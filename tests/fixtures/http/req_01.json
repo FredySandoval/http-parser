@@ -1,0 +1,70 @@
+{
+  "text": "GET https://example.com/comments/1",
+  "metadata": {
+    "length": 34,
+    "lines": 1,
+    "encoding": "UTF-8",
+    "source": {
+      "type": "string",
+      "name": "raw"
+    }
+  },
+  "lineContexts": [
+    {
+      "lineNumber": 1,
+      "startOffset": 0,
+      "endOffset": 34,
+      "text": "GET https://example.com/comments/1"
+    }
+  ],
+  "segments": [
+    {
+      "segmentId": 0,
+      "startLine": 1,
+      "endLine": 1,
+      "lines": [
+        {
+          "lineNumber": 1,
+          "startOffset": 0,
+          "endOffset": 34,
+          "text": "GET https://example.com/comments/1"
+        }
+      ]
+    }
+  ],
+  "ast": {
+    "metadata": {
+      "length": 34,
+      "lines": 1,
+      "encoding": "UTF-8",
+      "source": {
+        "type": "string",
+        "name": "raw"
+      }
+    },
+    "requests": [
+      {
+        "name": null,
+        "method": "GET",
+        "url": "https://example.com/comments/1",
+        "httpVersion": null,
+        "queryParams": [],
+        "headers": [],
+        "body": null,
+        "variables": {
+          "file": [],
+          "prompt": [],
+          "request": []
+        },
+        "settings": [],
+        "comments": [],
+        "rawTextRange": {
+          "startLine": 1,
+          "endLine": 1
+        },
+        "expectedResponse": null
+      }
+    ],
+    "fileVariables": []
+  }
+}

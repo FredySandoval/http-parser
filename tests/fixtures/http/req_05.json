@@ -1,0 +1,103 @@
+{
+  "text": "GET https://example.com/comments\n    ?page=2\n    &pageSize=10",
+  "metadata": {
+    "length": 61,
+    "lines": 3,
+    "encoding": "UTF-8",
+    "source": {
+      "type": "string",
+      "name": "raw"
+    }
+  },
+  "lineContexts": [
+    {
+      "lineNumber": 1,
+      "startOffset": 0,
+      "endOffset": 32,
+      "text": "GET https://example.com/comments"
+    },
+    {
+      "lineNumber": 2,
+      "startOffset": 33,
+      "endOffset": 44,
+      "text": "    ?page=2"
+    },
+    {
+      "lineNumber": 3,
+      "startOffset": 45,
+      "endOffset": 61,
+      "text": "    &pageSize=10"
+    }
+  ],
+  "segments": [
+    {
+      "segmentId": 0,
+      "startLine": 1,
+      "endLine": 3,
+      "lines": [
+        {
+          "lineNumber": 1,
+          "startOffset": 0,
+          "endOffset": 32,
+          "text": "GET https://example.com/comments"
+        },
+        {
+          "lineNumber": 2,
+          "startOffset": 33,
+          "endOffset": 44,
+          "text": "    ?page=2"
+        },
+        {
+          "lineNumber": 3,
+          "startOffset": 45,
+          "endOffset": 61,
+          "text": "    &pageSize=10"
+        }
+      ]
+    }
+  ],
+  "ast": {
+    "metadata": {
+      "length": 61,
+      "lines": 3,
+      "encoding": "UTF-8",
+      "source": {
+        "type": "string",
+        "name": "raw"
+      }
+    },
+    "requests": [
+      {
+        "name": null,
+        "method": "GET",
+        "url": "https://example.com/comments",
+        "httpVersion": null,
+        "queryParams": [
+          {
+            "key": "page",
+            "value": "2"
+          },
+          {
+            "key": "pageSize",
+            "value": "10"
+          }
+        ],
+        "headers": [],
+        "body": null,
+        "variables": {
+          "file": [],
+          "prompt": [],
+          "request": []
+        },
+        "settings": [],
+        "comments": [],
+        "rawTextRange": {
+          "startLine": 1,
+          "endLine": 3
+        },
+        "expectedResponse": null
+      }
+    ],
+    "fileVariables": []
+  }
+}

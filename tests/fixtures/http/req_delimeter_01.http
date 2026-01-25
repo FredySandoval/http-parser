@@ -1,0 +1,40 @@
+
+POST http://localhost:8080/comments HTTP/1.1
+content-type: application/json
+
+{
+    "name": "sample",
+    "time": "Wed, 21 Oct 2015 18:27:50 GMT"
+}
+
+###
+
+HTTP/1.1 201 Created
+Content-Type: application/json
+Location: https://example.com/comments/123
+Date: Wed, 21 Oct 2015 18:27:51 GMT
+
+{
+    "id": 123,
+    "name": "sample",
+    "time": "Wed, 21 Oct 2015 18:27:50 GMT",
+    "message": "Comment created successfully"
+}
+
+###
+
+GET http://localhost:8080/comments/1 HTTP/1.1
+
+###
+
+HTTP/1.1 201 Created
+Content-Type: application/json
+Location: https://example.com/comments/123
+Date: Wed, 21 Oct 2015 18:27:51 GMT
+
+{
+    "id": 123,
+    "name": "sample",
+    "time": "Wed, 21 Oct 2015 18:27:50 GMT",
+    "message": "Comment created successfully"
+}

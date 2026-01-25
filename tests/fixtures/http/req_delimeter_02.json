@@ -1,0 +1,296 @@
+{
+  "text": "###\nGET https://example.com/comments/1 HTTP/1.1\n\n###\n\nGET https://example.com/topics/1 HTTP/1.1\n\n###\n\nPOST https://example.com/comments HTTP/1.1\ncontent-type: application/json\n\n{\n    \"name\": \"sample\",\n    \"time\": \"Wed, 21 Oct 2015 18:27:50 GMT\"\n}",
+  "metadata": {
+    "length": 246,
+    "lines": 16,
+    "encoding": "UTF-8",
+    "source": {
+      "type": "string",
+      "name": "raw"
+    }
+  },
+  "lineContexts": [
+    {
+      "lineNumber": 1,
+      "startOffset": 0,
+      "endOffset": 3,
+      "text": "###"
+    },
+    {
+      "lineNumber": 2,
+      "startOffset": 4,
+      "endOffset": 47,
+      "text": "GET https://example.com/comments/1 HTTP/1.1"
+    },
+    {
+      "lineNumber": 3,
+      "startOffset": 48,
+      "endOffset": 48,
+      "text": ""
+    },
+    {
+      "lineNumber": 4,
+      "startOffset": 49,
+      "endOffset": 52,
+      "text": "###"
+    },
+    {
+      "lineNumber": 5,
+      "startOffset": 53,
+      "endOffset": 53,
+      "text": ""
+    },
+    {
+      "lineNumber": 6,
+      "startOffset": 54,
+      "endOffset": 95,
+      "text": "GET https://example.com/topics/1 HTTP/1.1"
+    },
+    {
+      "lineNumber": 7,
+      "startOffset": 96,
+      "endOffset": 96,
+      "text": ""
+    },
+    {
+      "lineNumber": 8,
+      "startOffset": 97,
+      "endOffset": 100,
+      "text": "###"
+    },
+    {
+      "lineNumber": 9,
+      "startOffset": 101,
+      "endOffset": 101,
+      "text": ""
+    },
+    {
+      "lineNumber": 10,
+      "startOffset": 102,
+      "endOffset": 144,
+      "text": "POST https://example.com/comments HTTP/1.1"
+    },
+    {
+      "lineNumber": 11,
+      "startOffset": 145,
+      "endOffset": 175,
+      "text": "content-type: application/json"
+    },
+    {
+      "lineNumber": 12,
+      "startOffset": 176,
+      "endOffset": 176,
+      "text": ""
+    },
+    {
+      "lineNumber": 13,
+      "startOffset": 177,
+      "endOffset": 178,
+      "text": "{"
+    },
+    {
+      "lineNumber": 14,
+      "startOffset": 179,
+      "endOffset": 200,
+      "text": "    \"name\": \"sample\","
+    },
+    {
+      "lineNumber": 15,
+      "startOffset": 201,
+      "endOffset": 244,
+      "text": "    \"time\": \"Wed, 21 Oct 2015 18:27:50 GMT\""
+    },
+    {
+      "lineNumber": 16,
+      "startOffset": 245,
+      "endOffset": 246,
+      "text": "}"
+    }
+  ],
+  "segments": [
+    {
+      "segmentId": 0,
+      "startLine": 2,
+      "endLine": 3,
+      "lines": [
+        {
+          "lineNumber": 2,
+          "startOffset": 4,
+          "endOffset": 47,
+          "text": "GET https://example.com/comments/1 HTTP/1.1"
+        },
+        {
+          "lineNumber": 3,
+          "startOffset": 48,
+          "endOffset": 48,
+          "text": ""
+        }
+      ]
+    },
+    {
+      "segmentId": 1,
+      "startLine": 5,
+      "endLine": 7,
+      "lines": [
+        {
+          "lineNumber": 5,
+          "startOffset": 53,
+          "endOffset": 53,
+          "text": ""
+        },
+        {
+          "lineNumber": 6,
+          "startOffset": 54,
+          "endOffset": 95,
+          "text": "GET https://example.com/topics/1 HTTP/1.1"
+        },
+        {
+          "lineNumber": 7,
+          "startOffset": 96,
+          "endOffset": 96,
+          "text": ""
+        }
+      ]
+    },
+    {
+      "segmentId": 2,
+      "startLine": 9,
+      "endLine": 16,
+      "lines": [
+        {
+          "lineNumber": 9,
+          "startOffset": 101,
+          "endOffset": 101,
+          "text": ""
+        },
+        {
+          "lineNumber": 10,
+          "startOffset": 102,
+          "endOffset": 144,
+          "text": "POST https://example.com/comments HTTP/1.1"
+        },
+        {
+          "lineNumber": 11,
+          "startOffset": 145,
+          "endOffset": 175,
+          "text": "content-type: application/json"
+        },
+        {
+          "lineNumber": 12,
+          "startOffset": 176,
+          "endOffset": 176,
+          "text": ""
+        },
+        {
+          "lineNumber": 13,
+          "startOffset": 177,
+          "endOffset": 178,
+          "text": "{"
+        },
+        {
+          "lineNumber": 14,
+          "startOffset": 179,
+          "endOffset": 200,
+          "text": "    \"name\": \"sample\","
+        },
+        {
+          "lineNumber": 15,
+          "startOffset": 201,
+          "endOffset": 244,
+          "text": "    \"time\": \"Wed, 21 Oct 2015 18:27:50 GMT\""
+        },
+        {
+          "lineNumber": 16,
+          "startOffset": 245,
+          "endOffset": 246,
+          "text": "}"
+        }
+      ]
+    }
+  ],
+  "ast": {
+    "metadata": {
+      "length": 246,
+      "lines": 16,
+      "encoding": "UTF-8",
+      "source": {
+        "type": "string",
+        "name": "raw"
+      }
+    },
+    "requests": [
+      {
+        "name": null,
+        "method": "GET",
+        "url": "https://example.com/comments/1",
+        "httpVersion": "HTTP/1.1",
+        "queryParams": [],
+        "headers": [],
+        "body": null,
+        "variables": {
+          "file": [],
+          "prompt": [],
+          "request": []
+        },
+        "settings": [],
+        "comments": [],
+        "rawTextRange": {
+          "startLine": 2,
+          "endLine": 3
+        },
+        "expectedResponse": null
+      },
+      {
+        "name": null,
+        "method": "GET",
+        "url": "https://example.com/topics/1",
+        "httpVersion": "HTTP/1.1",
+        "queryParams": [],
+        "headers": [],
+        "body": null,
+        "variables": {
+          "file": [],
+          "prompt": [],
+          "request": []
+        },
+        "settings": [],
+        "comments": [],
+        "rawTextRange": {
+          "startLine": 5,
+          "endLine": 7
+        },
+        "expectedResponse": null
+      },
+      {
+        "name": null,
+        "method": "POST",
+        "url": "https://example.com/comments",
+        "httpVersion": "HTTP/1.1",
+        "queryParams": [],
+        "headers": [
+          {
+            "name": "content-type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "type": "raw",
+          "raw": "{\n    \"name\": \"sample\",\n    \"time\": \"Wed, 21 Oct 2015 18:27:50 GMT\"\n}"
+        },
+        "variables": {
+          "file": [],
+          "prompt": [],
+          "request": []
+        },
+        "settings": [],
+        "comments": [],
+        "rawTextRange": {
+          "startLine": 9,
+          "endLine": 16
+        },
+        "expectedResponse": null
+      }
+    ],
+    "fileVariables": []
+  }
+}

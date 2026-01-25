@@ -1,0 +1,58 @@
+{
+  "name": "@fredy/http-parser",
+  "version": "1.0.0",
+  "description": "A parser for REST client HTTP files that transforms plain text HTTP requests into structured, machine-readable objects",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    }
+  },
+  "author": "Fredy Sandoval",
+  "website": "https://fredy.dev",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FredySandoval/http-parser.git"
+  },
+  "bugs": {
+    "url": "https://github.com/FredySandoval/http-parser/issues"
+  },
+  "homepage": "https://github.com/FredySandoval/http-parser#readme",
+  "keywords": [
+    "http",
+    "parser",
+    "rest-client",
+    "http-file",
+    "api"
+  ],
+  "scripts": {
+    "build": "bunx tsup",
+    "test": "bun test",
+    "format": "prettier --write src tests"
+  },
+  "peerDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "yargs-parser": "^22.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "SPECIFICATION.md",
+    "LICENSE"
+  ],
+  "devDependencies": {
+    "@types/bun": "^1.3.6",
+    "@types/yargs-parser": "^21.0.3",
+    "prettier": "^3.8.1",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  }
+}

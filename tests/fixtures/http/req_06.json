@@ -1,0 +1,169 @@
+{
+  "text": "POST https://example.com/comments HTTP/1.1\nContent-Type: application/xml\nAuthorization: token xxx\n\n<request>\n    <name>sample</name>\n    <time>Wed, 21 Oct 2015 18:27:50 GMT</time>\n</request>",
+  "metadata": {
+    "length": 190,
+    "lines": 8,
+    "encoding": "UTF-8",
+    "source": {
+      "type": "string",
+      "name": "raw"
+    }
+  },
+  "lineContexts": [
+    {
+      "lineNumber": 1,
+      "startOffset": 0,
+      "endOffset": 42,
+      "text": "POST https://example.com/comments HTTP/1.1"
+    },
+    {
+      "lineNumber": 2,
+      "startOffset": 43,
+      "endOffset": 72,
+      "text": "Content-Type: application/xml"
+    },
+    {
+      "lineNumber": 3,
+      "startOffset": 73,
+      "endOffset": 97,
+      "text": "Authorization: token xxx"
+    },
+    {
+      "lineNumber": 4,
+      "startOffset": 98,
+      "endOffset": 98,
+      "text": ""
+    },
+    {
+      "lineNumber": 5,
+      "startOffset": 99,
+      "endOffset": 108,
+      "text": "<request>"
+    },
+    {
+      "lineNumber": 6,
+      "startOffset": 109,
+      "endOffset": 132,
+      "text": "    <name>sample</name>"
+    },
+    {
+      "lineNumber": 7,
+      "startOffset": 133,
+      "endOffset": 179,
+      "text": "    <time>Wed, 21 Oct 2015 18:27:50 GMT</time>"
+    },
+    {
+      "lineNumber": 8,
+      "startOffset": 180,
+      "endOffset": 190,
+      "text": "</request>"
+    }
+  ],
+  "segments": [
+    {
+      "segmentId": 0,
+      "startLine": 1,
+      "endLine": 8,
+      "lines": [
+        {
+          "lineNumber": 1,
+          "startOffset": 0,
+          "endOffset": 42,
+          "text": "POST https://example.com/comments HTTP/1.1"
+        },
+        {
+          "lineNumber": 2,
+          "startOffset": 43,
+          "endOffset": 72,
+          "text": "Content-Type: application/xml"
+        },
+        {
+          "lineNumber": 3,
+          "startOffset": 73,
+          "endOffset": 97,
+          "text": "Authorization: token xxx"
+        },
+        {
+          "lineNumber": 4,
+          "startOffset": 98,
+          "endOffset": 98,
+          "text": ""
+        },
+        {
+          "lineNumber": 5,
+          "startOffset": 99,
+          "endOffset": 108,
+          "text": "<request>"
+        },
+        {
+          "lineNumber": 6,
+          "startOffset": 109,
+          "endOffset": 132,
+          "text": "    <name>sample</name>"
+        },
+        {
+          "lineNumber": 7,
+          "startOffset": 133,
+          "endOffset": 179,
+          "text": "    <time>Wed, 21 Oct 2015 18:27:50 GMT</time>"
+        },
+        {
+          "lineNumber": 8,
+          "startOffset": 180,
+          "endOffset": 190,
+          "text": "</request>"
+        }
+      ]
+    }
+  ],
+  "ast": {
+    "metadata": {
+      "length": 190,
+      "lines": 8,
+      "encoding": "UTF-8",
+      "source": {
+        "type": "string",
+        "name": "raw"
+      }
+    },
+    "requests": [
+      {
+        "name": null,
+        "method": "POST",
+        "url": "https://example.com/comments",
+        "httpVersion": "HTTP/1.1",
+        "queryParams": [],
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "application/xml"
+          },
+          {
+            "name": "Authorization",
+            "value": "token xxx"
+          }
+        ],
+        "body": {
+          "type": "file-ref",
+          "fileRef": {
+            "path": "request>",
+            "processVariables": false
+          }
+        },
+        "variables": {
+          "file": [],
+          "prompt": [],
+          "request": []
+        },
+        "settings": [],
+        "comments": [],
+        "rawTextRange": {
+          "startLine": 1,
+          "endLine": 8
+        },
+        "expectedResponse": null
+      }
+    ],
+    "fileVariables": []
+  }
+}
