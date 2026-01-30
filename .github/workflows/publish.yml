@@ -17,6 +17,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Install Bun
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
       - uses: pnpm/action-setup@v4
         with:
           version: 9.0.0
@@ -28,7 +34,7 @@ jobs:
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
-      - run: pnpm run typecheck
+      - run: pnpm run test
       - run: pnpm run build
 
       - name: Verify version matches tag
