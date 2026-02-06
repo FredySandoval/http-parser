@@ -1,6 +1,6 @@
 {
   "name": "@fredy-dev/http-parser",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A parser for REST client HTTP files that transforms plain text HTTP requests into structured, machine-readable objects",
   "type": "module",
   "main": "./dist/index.js",
