@@ -543,7 +543,7 @@
           "raw": "{\n    \"name\": \"sample\",\n    \"time\": \"Wed, 21 Oct 2015 18:27:50 GMT\"\n}\n"
         },
         "variables": {
-          "fileVariable": [],
+          "fileVariables": [],
           "prompt": [],
           "request": []
         },
@@ -573,7 +573,7 @@
           ],
           "body": "{\n    \"id\": 123,\n    \"name\": \"sample\",\n    \"time\": \"Wed, 21 Oct 2015 18:27:50 GMT\",\n    \"message\": \"Comment created successfully\"\n}\n",
           "variables": {
-            "fileVariable": []
+            "fileVariables": []
           },
           "rawTextRange": {
             "startLine": 11,
@@ -590,7 +590,7 @@
         "headers": [],
         "body": null,
         "variables": {
-          "fileVariable": [],
+          "fileVariables": [],
           "prompt": [],
           "request": []
         },
@@ -620,7 +620,7 @@
           ],
           "body": "{\n    \"id\": 123,\n    \"name\": \"sample\",\n    \"time\": \"Wed, 21 Oct 2015 18:27:50 GMT\",\n    \"message\": \"Comment created successfully\"\n}\n",
           "variables": {
-            "fileVariable": []
+            "fileVariables": []
           },
           "rawTextRange": {
             "startLine": 29,

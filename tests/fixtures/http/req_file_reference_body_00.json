@@ -99,7 +99,7 @@
           }
         },
         "variables": {
-          "file": [],
+          "fileVariables": [],
           "prompt": [],
           "request": []
         },

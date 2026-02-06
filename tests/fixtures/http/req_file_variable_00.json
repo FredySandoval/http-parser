@@ -105,7 +105,7 @@
         ],
         "body": null,
         "variables": {
-          "file": [
+          "fileVariables": [
             {
               "key": "baseUrl",
               "value": "https://api.example.com",

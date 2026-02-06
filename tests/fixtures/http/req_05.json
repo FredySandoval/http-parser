@@ -85,7 +85,7 @@
         "headers": [],
         "body": null,
         "variables": {
-          "fileVariable": [],
+          "fileVariables": [],
           "prompt": [],
           "request": []
         },

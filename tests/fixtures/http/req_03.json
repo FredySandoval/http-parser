@@ -132,7 +132,7 @@
           "raw": "{\n    \"name\": \"sample\",\n    \"time\": \"Wed, 21 Oct 2015 18:27:50 GMT\"\n}"
         },
         "variables": {
-          "fileVariable": [],
+          "fileVariables": [],
           "prompt": [],
           "request": []
         },

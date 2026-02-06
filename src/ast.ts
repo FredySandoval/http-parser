@@ -27,7 +27,7 @@ export interface ExpectedResponse {
   /** Variable definitions and references found within this response scope */
   variables: {
     /** Local file variable definitions found in this segment (@var = val) */
-    fileVariable: FileVariable[];
+    fileVariables: FileVariable[];
   };
   /** Range in the original text */
   rawTextRange: {
@@ -58,7 +58,7 @@ export interface Request {
   /** Variable definitions and references found within this request scope */
   variables: {
     /** Local file variable definitions (@var = val) */
-    fileVariable: FileVariable[];
+    fileVariables: FileVariable[];
     /** Prompt variable definitions (# @prompt var) */
     prompt: PromptVariable[];
     /** References to other requests found in this request ({{req.resp.body...}}) */

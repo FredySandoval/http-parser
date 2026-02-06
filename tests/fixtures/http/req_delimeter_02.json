@@ -228,7 +228,7 @@
         "headers": [],
         "body": null,
         "variables": {
-          "fileVariable": [],
+          "fileVariables": [],
           "prompt": [],
           "request": []
         },
@@ -249,7 +249,7 @@
         "headers": [],
         "body": null,
         "variables": {
-          "fileVariable": [],
+          "fileVariables": [],
           "prompt": [],
           "request": []
         },
@@ -278,7 +278,7 @@
           "raw": "{\n    \"name\": \"sample\",\n    \"time\": \"Wed, 21 Oct 2015 18:27:50 GMT\"\n}"
         },
         "variables": {
-          "fileVariable": [],
+          "fileVariables": [],
           "prompt": [],
           "request": []
         },

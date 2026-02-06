@@ -375,7 +375,7 @@ export class HttpRequestParser {
     for (const obj of parsedObjects) {
       // Collect all file variables from all segments
       if (obj.variables) {
-        fileVariables.push(...obj.variables.fileVariable);
+        fileVariables.push(...obj.variables.fileVariables);
       }
 
       if (this.isRequest(obj)) {

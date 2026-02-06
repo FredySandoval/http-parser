@@ -43,7 +43,7 @@ console.dir(result, { depth: null });
 
 The parser produces a structured AST with the following format:
 
-```typescript
+```ts
 interface ParseResult {
   text: string;
   metadata: ParseMetadata;
@@ -133,7 +133,6 @@ interface FormParam {
   key: string;
   value: string;
 }
-
 ```
 
 ## Supported Syntax
