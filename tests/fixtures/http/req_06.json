@@ -151,7 +151,7 @@
           }
         },
         "variables": {
-          "file": [],
+          "fileVariable": [],
           "prompt": [],
           "request": []
         },

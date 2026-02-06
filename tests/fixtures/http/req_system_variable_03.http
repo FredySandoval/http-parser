@@ -1,0 +1,3 @@
+GET https://api.example.com/users/{{$guid}}
+X-Timestamp: {{$timestamp}}
+X-Date: {{$datetime iso8601}}

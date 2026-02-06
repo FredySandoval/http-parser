@@ -1,7 +1,7 @@
 {
-  "text": "GET https://example.com/comments\n    ?page=2\n    &pageSize=10",
+  "text": "curl -X POST https://api.example.com/users \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"name\": \"Jane Doe\"}'",
   "metadata": {
-    "length": 61,
+    "length": 112,
     "lines": 3,
     "encoding": "UTF-8",
     "source": {
@@ -13,20 +13,20 @@
     {
       "lineNumber": 1,
       "startOffset": 0,
-      "endOffset": 32,
-      "text": "GET https://example.com/comments"
+      "endOffset": 44,
+      "text": "curl -X POST https://api.example.com/users \\"
     },
     {
       "lineNumber": 2,
-      "startOffset": 33,
-      "endOffset": 44,
-      "text": "    ?page=2"
+      "startOffset": 45,
+      "endOffset": 84,
+      "text": "  -H \"Content-Type: application/json\" \\"
     },
     {
       "lineNumber": 3,
-      "startOffset": 45,
-      "endOffset": 61,
-      "text": "    &pageSize=10"
+      "startOffset": 85,
+      "endOffset": 112,
+      "text": "  -d '{\"name\": \"Jane Doe\"}'"
     }
   ],
   "segments": [
@@ -38,27 +38,27 @@
         {
           "lineNumber": 1,
           "startOffset": 0,
-          "endOffset": 32,
-          "text": "GET https://example.com/comments"
+          "endOffset": 44,
+          "text": "curl -X POST https://api.example.com/users \\"
         },
         {
           "lineNumber": 2,
-          "startOffset": 33,
-          "endOffset": 44,
-          "text": "    ?page=2"
+          "startOffset": 45,
+          "endOffset": 84,
+          "text": "  -H \"Content-Type: application/json\" \\"
         },
         {
           "lineNumber": 3,
-          "startOffset": 45,
-          "endOffset": 61,
-          "text": "    &pageSize=10"
+          "startOffset": 85,
+          "endOffset": 112,
+          "text": "  -d '{\"name\": \"Jane Doe\"}'"
         }
       ]
     }
   ],
   "ast": {
     "metadata": {
-      "length": 61,
+      "length": 112,
       "lines": 3,
       "encoding": "UTF-8",
       "source": {
@@ -69,23 +69,22 @@
     "requests": [
       {
         "name": null,
-        "method": "GET",
-        "url": "https://example.com/comments",
+        "method": "POST",
+        "url": "https://api.example.com/users",
         "httpVersion": null,
-        "queryParams": [
+        "queryParams": [],
+        "headers": [
           {
-            "key": "page",
-            "value": "2"
-          },
-          {
-            "key": "pageSize",
-            "value": "10"
+            "name": "Content-Type",
+            "value": "application/json"
           }
         ],
-        "headers": [],
-        "body": null,
+        "body": {
+          "type": "raw",
+          "raw": "{\"name\": \"Jane Doe\"}"
+        },
         "variables": {
-          "fileVariable": [],
+          "file": [],
           "prompt": [],
           "request": []
         },

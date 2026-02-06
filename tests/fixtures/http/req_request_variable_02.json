@@ -1,0 +1,297 @@
+{
+  "text": "# @name login\nPOST https://api.example.com/login\nContent-Type: application/json\n\n{\n  \"username\": \"test\",\n  \"password\": \"test\"\n}\n\n###\n\n@authToken = {{login.response.headers.X-Auth-Token}}\n\nGET https://api.example.com/users\nAuthorization: Bearer {{authToken}}",
+  "metadata": {
+    "length": 257,
+    "lines": 15,
+    "encoding": "UTF-8",
+    "source": {
+      "type": "string",
+      "name": "raw"
+    }
+  },
+  "lineContexts": [
+    {
+      "lineNumber": 1,
+      "startOffset": 0,
+      "endOffset": 13,
+      "text": "# @name login"
+    },
+    {
+      "lineNumber": 2,
+      "startOffset": 14,
+      "endOffset": 48,
+      "text": "POST https://api.example.com/login"
+    },
+    {
+      "lineNumber": 3,
+      "startOffset": 49,
+      "endOffset": 79,
+      "text": "Content-Type: application/json"
+    },
+    {
+      "lineNumber": 4,
+      "startOffset": 80,
+      "endOffset": 80,
+      "text": ""
+    },
+    {
+      "lineNumber": 5,
+      "startOffset": 81,
+      "endOffset": 82,
+      "text": "{"
+    },
+    {
+      "lineNumber": 6,
+      "startOffset": 83,
+      "endOffset": 104,
+      "text": "  \"username\": \"test\","
+    },
+    {
+      "lineNumber": 7,
+      "startOffset": 105,
+      "endOffset": 125,
+      "text": "  \"password\": \"test\""
+    },
+    {
+      "lineNumber": 8,
+      "startOffset": 126,
+      "endOffset": 127,
+      "text": "}"
+    },
+    {
+      "lineNumber": 9,
+      "startOffset": 128,
+      "endOffset": 128,
+      "text": ""
+    },
+    {
+      "lineNumber": 10,
+      "startOffset": 129,
+      "endOffset": 132,
+      "text": "###"
+    },
+    {
+      "lineNumber": 11,
+      "startOffset": 133,
+      "endOffset": 133,
+      "text": ""
+    },
+    {
+      "lineNumber": 12,
+      "startOffset": 134,
+      "endOffset": 186,
+      "text": "@authToken = {{login.response.headers.X-Auth-Token}}"
+    },
+    {
+      "lineNumber": 13,
+      "startOffset": 187,
+      "endOffset": 187,
+      "text": ""
+    },
+    {
+      "lineNumber": 14,
+      "startOffset": 188,
+      "endOffset": 221,
+      "text": "GET https://api.example.com/users"
+    },
+    {
+      "lineNumber": 15,
+      "startOffset": 222,
+      "endOffset": 257,
+      "text": "Authorization: Bearer {{authToken}}"
+    }
+  ],
+  "segments": [
+    {
+      "segmentId": 0,
+      "startLine": 1,
+      "endLine": 9,
+      "lines": [
+        {
+          "lineNumber": 1,
+          "startOffset": 0,
+          "endOffset": 13,
+          "text": "# @name login"
+        },
+        {
+          "lineNumber": 2,
+          "startOffset": 14,
+          "endOffset": 48,
+          "text": "POST https://api.example.com/login"
+        },
+        {
+          "lineNumber": 3,
+          "startOffset": 49,
+          "endOffset": 79,
+          "text": "Content-Type: application/json"
+        },
+        {
+          "lineNumber": 4,
+          "startOffset": 80,
+          "endOffset": 80,
+          "text": ""
+        },
+        {
+          "lineNumber": 5,
+          "startOffset": 81,
+          "endOffset": 82,
+          "text": "{"
+        },
+        {
+          "lineNumber": 6,
+          "startOffset": 83,
+          "endOffset": 104,
+          "text": "  \"username\": \"test\","
+        },
+        {
+          "lineNumber": 7,
+          "startOffset": 105,
+          "endOffset": 125,
+          "text": "  \"password\": \"test\""
+        },
+        {
+          "lineNumber": 8,
+          "startOffset": 126,
+          "endOffset": 127,
+          "text": "}"
+        },
+        {
+          "lineNumber": 9,
+          "startOffset": 128,
+          "endOffset": 128,
+          "text": ""
+        }
+      ]
+    },
+    {
+      "segmentId": 1,
+      "startLine": 11,
+      "endLine": 15,
+      "lines": [
+        {
+          "lineNumber": 11,
+          "startOffset": 133,
+          "endOffset": 133,
+          "text": ""
+        },
+        {
+          "lineNumber": 12,
+          "startOffset": 134,
+          "endOffset": 186,
+          "text": "@authToken = {{login.response.headers.X-Auth-Token}}"
+        },
+        {
+          "lineNumber": 13,
+          "startOffset": 187,
+          "endOffset": 187,
+          "text": ""
+        },
+        {
+          "lineNumber": 14,
+          "startOffset": 188,
+          "endOffset": 221,
+          "text": "GET https://api.example.com/users"
+        },
+        {
+          "lineNumber": 15,
+          "startOffset": 222,
+          "endOffset": 257,
+          "text": "Authorization: Bearer {{authToken}}"
+        }
+      ]
+    }
+  ],
+  "ast": {
+    "metadata": {
+      "length": 257,
+      "lines": 15,
+      "encoding": "UTF-8",
+      "source": {
+        "type": "string",
+        "name": "raw"
+      }
+    },
+    "requests": [
+      {
+        "name": "login",
+        "method": "POST",
+        "url": "https://api.example.com/login",
+        "httpVersion": null,
+        "queryParams": [],
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "type": "raw",
+          "raw": "{\n  \"username\": \"test\",\n  \"password\": \"test\"\n}\n"
+        },
+        "variables": {
+          "file": [],
+          "prompt": [],
+          "request": []
+        },
+        "settings": [],
+        "comments": [],
+        "rawTextRange": {
+          "startLine": 1,
+          "endLine": 9
+        },
+        "expectedResponse": null
+      },
+      {
+        "name": null,
+        "method": "GET",
+        "url": "https://api.example.com/users",
+        "httpVersion": null,
+        "queryParams": [],
+        "headers": [
+          {
+            "name": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
+        "body": null,
+        "variables": {
+          "file": [
+            {
+              "key": "authToken",
+              "value": "{{login.response.headers.X-Auth-Token}}",
+              "lineNumber": 12
+            }
+          ],
+          "prompt": [],
+          "request": [
+            {
+              "kind": "request",
+              "name": "login.response.headers.X-Auth-Token",
+              "raw": "{{login.response.headers.X-Auth-Token}}",
+              "offset": 13,
+              "length": 39,
+              "requestName": "login",
+              "source": "response",
+              "part": "headers",
+              "path": "X-Auth-Token"
+            }
+          ]
+        },
+        "settings": [],
+        "comments": [],
+        "rawTextRange": {
+          "startLine": 11,
+          "endLine": 15
+        },
+        "expectedResponse": null
+      }
+    ],
+    "fileVariables": [
+      {
+        "key": "authToken",
+        "value": "{{login.response.headers.X-Auth-Token}}",
+        "lineNumber": 12
+      }
+    ]
+  }
+}

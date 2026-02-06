@@ -1,0 +1,117 @@
+{
+  "text": "POST https://api.example.com/upload\nContent-Type: application/json\n\n<@ ./data.json",
+  "metadata": {
+    "length": 82,
+    "lines": 4,
+    "encoding": "UTF-8",
+    "source": {
+      "type": "string",
+      "name": "raw"
+    }
+  },
+  "lineContexts": [
+    {
+      "lineNumber": 1,
+      "startOffset": 0,
+      "endOffset": 35,
+      "text": "POST https://api.example.com/upload"
+    },
+    {
+      "lineNumber": 2,
+      "startOffset": 36,
+      "endOffset": 66,
+      "text": "Content-Type: application/json"
+    },
+    {
+      "lineNumber": 3,
+      "startOffset": 67,
+      "endOffset": 67,
+      "text": ""
+    },
+    {
+      "lineNumber": 4,
+      "startOffset": 68,
+      "endOffset": 82,
+      "text": "<@ ./data.json"
+    }
+  ],
+  "segments": [
+    {
+      "segmentId": 0,
+      "startLine": 1,
+      "endLine": 4,
+      "lines": [
+        {
+          "lineNumber": 1,
+          "startOffset": 0,
+          "endOffset": 35,
+          "text": "POST https://api.example.com/upload"
+        },
+        {
+          "lineNumber": 2,
+          "startOffset": 36,
+          "endOffset": 66,
+          "text": "Content-Type: application/json"
+        },
+        {
+          "lineNumber": 3,
+          "startOffset": 67,
+          "endOffset": 67,
+          "text": ""
+        },
+        {
+          "lineNumber": 4,
+          "startOffset": 68,
+          "endOffset": 82,
+          "text": "<@ ./data.json"
+        }
+      ]
+    }
+  ],
+  "ast": {
+    "metadata": {
+      "length": 82,
+      "lines": 4,
+      "encoding": "UTF-8",
+      "source": {
+        "type": "string",
+        "name": "raw"
+      }
+    },
+    "requests": [
+      {
+        "name": null,
+        "method": "POST",
+        "url": "https://api.example.com/upload",
+        "httpVersion": null,
+        "queryParams": [],
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "type": "file-ref",
+          "fileRef": {
+            "path": "./data.json",
+            "processVariables": true
+          }
+        },
+        "variables": {
+          "file": [],
+          "prompt": [],
+          "request": []
+        },
+        "settings": [],
+        "comments": [],
+        "rawTextRange": {
+          "startLine": 1,
+          "endLine": 4
+        },
+        "expectedResponse": null
+      }
+    ],
+    "fileVariables": []
+  }
+}

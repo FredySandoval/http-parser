@@ -1,0 +1,197 @@
+{
+  "text": "# @prompt username Your username\n# @prompt password Your password (will be masked)\n\nPOST https://api.example.com/login\nContent-Type: application/json\n\n{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}",
+  "metadata": {
+    "length": 213,
+    "lines": 10,
+    "encoding": "UTF-8",
+    "source": {
+      "type": "string",
+      "name": "raw"
+    }
+  },
+  "lineContexts": [
+    {
+      "lineNumber": 1,
+      "startOffset": 0,
+      "endOffset": 32,
+      "text": "# @prompt username Your username"
+    },
+    {
+      "lineNumber": 2,
+      "startOffset": 33,
+      "endOffset": 82,
+      "text": "# @prompt password Your password (will be masked)"
+    },
+    {
+      "lineNumber": 3,
+      "startOffset": 83,
+      "endOffset": 83,
+      "text": ""
+    },
+    {
+      "lineNumber": 4,
+      "startOffset": 84,
+      "endOffset": 118,
+      "text": "POST https://api.example.com/login"
+    },
+    {
+      "lineNumber": 5,
+      "startOffset": 119,
+      "endOffset": 149,
+      "text": "Content-Type: application/json"
+    },
+    {
+      "lineNumber": 6,
+      "startOffset": 150,
+      "endOffset": 150,
+      "text": ""
+    },
+    {
+      "lineNumber": 7,
+      "startOffset": 151,
+      "endOffset": 152,
+      "text": "{"
+    },
+    {
+      "lineNumber": 8,
+      "startOffset": 153,
+      "endOffset": 182,
+      "text": "  \"username\": \"{{username}}\","
+    },
+    {
+      "lineNumber": 9,
+      "startOffset": 183,
+      "endOffset": 211,
+      "text": "  \"password\": \"{{password}}\""
+    },
+    {
+      "lineNumber": 10,
+      "startOffset": 212,
+      "endOffset": 213,
+      "text": "}"
+    }
+  ],
+  "segments": [
+    {
+      "segmentId": 0,
+      "startLine": 1,
+      "endLine": 10,
+      "lines": [
+        {
+          "lineNumber": 1,
+          "startOffset": 0,
+          "endOffset": 32,
+          "text": "# @prompt username Your username"
+        },
+        {
+          "lineNumber": 2,
+          "startOffset": 33,
+          "endOffset": 82,
+          "text": "# @prompt password Your password (will be masked)"
+        },
+        {
+          "lineNumber": 3,
+          "startOffset": 83,
+          "endOffset": 83,
+          "text": ""
+        },
+        {
+          "lineNumber": 4,
+          "startOffset": 84,
+          "endOffset": 118,
+          "text": "POST https://api.example.com/login"
+        },
+        {
+          "lineNumber": 5,
+          "startOffset": 119,
+          "endOffset": 149,
+          "text": "Content-Type: application/json"
+        },
+        {
+          "lineNumber": 6,
+          "startOffset": 150,
+          "endOffset": 150,
+          "text": ""
+        },
+        {
+          "lineNumber": 7,
+          "startOffset": 151,
+          "endOffset": 152,
+          "text": "{"
+        },
+        {
+          "lineNumber": 8,
+          "startOffset": 153,
+          "endOffset": 182,
+          "text": "  \"username\": \"{{username}}\","
+        },
+        {
+          "lineNumber": 9,
+          "startOffset": 183,
+          "endOffset": 211,
+          "text": "  \"password\": \"{{password}}\""
+        },
+        {
+          "lineNumber": 10,
+          "startOffset": 212,
+          "endOffset": 213,
+          "text": "}"
+        }
+      ]
+    }
+  ],
+  "ast": {
+    "metadata": {
+      "length": 213,
+      "lines": 10,
+      "encoding": "UTF-8",
+      "source": {
+        "type": "string",
+        "name": "raw"
+      }
+    },
+    "requests": [
+      {
+        "name": null,
+        "method": "POST",
+        "url": "https://api.example.com/login",
+        "httpVersion": null,
+        "queryParams": [],
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "type": "raw",
+          "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}"
+        },
+        "variables": {
+          "file": [],
+          "prompt": [
+            {
+              "name": "username",
+              "description": "Your username",
+              "lineNumber": 1
+            },
+            {
+              "name": "password",
+              "description": "Your password (will be masked)",
+              "lineNumber": 2
+            }
+          ],
+          "request": []
+        },
+        "settings": [],
+        "comments": [],
+        "rawTextRange": {
+          "startLine": 1,
+          "endLine": 10
+        },
+        "expectedResponse": null
+      }
+    ],
+    "fileVariables": []
+  }
+}

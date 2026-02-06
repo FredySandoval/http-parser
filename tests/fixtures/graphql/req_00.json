@@ -1,0 +1,241 @@
+{
+  "text": "POST https://api.example.com/graphql\nX-REQUEST-TYPE: GraphQL\nContent-Type: application/json\n\nquery GetUser($id: ID!) {\n  user(id: $id) {\n    name\n    email\n  }\n}\n\n{\n  \"id\": \"123\"\n}",
+  "metadata": {
+    "length": 180,
+    "lines": 14,
+    "encoding": "UTF-8",
+    "source": {
+      "type": "string",
+      "name": "raw"
+    }
+  },
+  "lineContexts": [
+    {
+      "lineNumber": 1,
+      "startOffset": 0,
+      "endOffset": 36,
+      "text": "POST https://api.example.com/graphql"
+    },
+    {
+      "lineNumber": 2,
+      "startOffset": 37,
+      "endOffset": 60,
+      "text": "X-REQUEST-TYPE: GraphQL"
+    },
+    {
+      "lineNumber": 3,
+      "startOffset": 61,
+      "endOffset": 91,
+      "text": "Content-Type: application/json"
+    },
+    {
+      "lineNumber": 4,
+      "startOffset": 92,
+      "endOffset": 92,
+      "text": ""
+    },
+    {
+      "lineNumber": 5,
+      "startOffset": 93,
+      "endOffset": 118,
+      "text": "query GetUser($id: ID!) {"
+    },
+    {
+      "lineNumber": 6,
+      "startOffset": 119,
+      "endOffset": 136,
+      "text": "  user(id: $id) {"
+    },
+    {
+      "lineNumber": 7,
+      "startOffset": 137,
+      "endOffset": 145,
+      "text": "    name"
+    },
+    {
+      "lineNumber": 8,
+      "startOffset": 146,
+      "endOffset": 155,
+      "text": "    email"
+    },
+    {
+      "lineNumber": 9,
+      "startOffset": 156,
+      "endOffset": 159,
+      "text": "  }"
+    },
+    {
+      "lineNumber": 10,
+      "startOffset": 160,
+      "endOffset": 161,
+      "text": "}"
+    },
+    {
+      "lineNumber": 11,
+      "startOffset": 162,
+      "endOffset": 162,
+      "text": ""
+    },
+    {
+      "lineNumber": 12,
+      "startOffset": 163,
+      "endOffset": 164,
+      "text": "{"
+    },
+    {
+      "lineNumber": 13,
+      "startOffset": 165,
+      "endOffset": 178,
+      "text": "  \"id\": \"123\""
+    },
+    {
+      "lineNumber": 14,
+      "startOffset": 179,
+      "endOffset": 180,
+      "text": "}"
+    }
+  ],
+  "segments": [
+    {
+      "segmentId": 0,
+      "startLine": 1,
+      "endLine": 14,
+      "lines": [
+        {
+          "lineNumber": 1,
+          "startOffset": 0,
+          "endOffset": 36,
+          "text": "POST https://api.example.com/graphql"
+        },
+        {
+          "lineNumber": 2,
+          "startOffset": 37,
+          "endOffset": 60,
+          "text": "X-REQUEST-TYPE: GraphQL"
+        },
+        {
+          "lineNumber": 3,
+          "startOffset": 61,
+          "endOffset": 91,
+          "text": "Content-Type: application/json"
+        },
+        {
+          "lineNumber": 4,
+          "startOffset": 92,
+          "endOffset": 92,
+          "text": ""
+        },
+        {
+          "lineNumber": 5,
+          "startOffset": 93,
+          "endOffset": 118,
+          "text": "query GetUser($id: ID!) {"
+        },
+        {
+          "lineNumber": 6,
+          "startOffset": 119,
+          "endOffset": 136,
+          "text": "  user(id: $id) {"
+        },
+        {
+          "lineNumber": 7,
+          "startOffset": 137,
+          "endOffset": 145,
+          "text": "    name"
+        },
+        {
+          "lineNumber": 8,
+          "startOffset": 146,
+          "endOffset": 155,
+          "text": "    email"
+        },
+        {
+          "lineNumber": 9,
+          "startOffset": 156,
+          "endOffset": 159,
+          "text": "  }"
+        },
+        {
+          "lineNumber": 10,
+          "startOffset": 160,
+          "endOffset": 161,
+          "text": "}"
+        },
+        {
+          "lineNumber": 11,
+          "startOffset": 162,
+          "endOffset": 162,
+          "text": ""
+        },
+        {
+          "lineNumber": 12,
+          "startOffset": 163,
+          "endOffset": 164,
+          "text": "{"
+        },
+        {
+          "lineNumber": 13,
+          "startOffset": 165,
+          "endOffset": 178,
+          "text": "  \"id\": \"123\""
+        },
+        {
+          "lineNumber": 14,
+          "startOffset": 179,
+          "endOffset": 180,
+          "text": "}"
+        }
+      ]
+    }
+  ],
+  "ast": {
+    "metadata": {
+      "length": 180,
+      "lines": 14,
+      "encoding": "UTF-8",
+      "source": {
+        "type": "string",
+        "name": "raw"
+      }
+    },
+    "requests": [
+      {
+        "name": null,
+        "method": "POST",
+        "url": "https://api.example.com/graphql",
+        "httpVersion": null,
+        "queryParams": [],
+        "headers": [
+          {
+            "name": "X-REQUEST-TYPE",
+            "value": "GraphQL"
+          },
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "type": "graphql",
+          "graphql": {
+            "query": "query GetUser($id: ID!) {\n  user(id: $id) {\n    name\n    email\n  }\n}",
+            "variables": "{\n  \"id\": \"123\"\n}"
+          }
+        },
+        "variables": {
+          "file": [],
+          "prompt": [],
+          "request": []
+        },
+        "settings": [],
+        "comments": [],
+        "rawTextRange": {
+          "startLine": 1,
+          "endLine": 14
+        },
+        "expectedResponse": null
+      }
+    ],
+    "fileVariables": []
+  }
+}

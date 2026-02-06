@@ -1,7 +1,7 @@
 {
-  "text": "GET https://example.com/comments\n    ?page=2\n    &pageSize=10",
+  "text": "GET https://api.example.com/users/{{$guid}}\nX-Timestamp: {{$timestamp}}\nX-Date: {{$datetime iso8601}}",
   "metadata": {
-    "length": 61,
+    "length": 101,
     "lines": 3,
     "encoding": "UTF-8",
     "source": {
@@ -13,20 +13,20 @@
     {
       "lineNumber": 1,
       "startOffset": 0,
-      "endOffset": 32,
-      "text": "GET https://example.com/comments"
+      "endOffset": 43,
+      "text": "GET https://api.example.com/users/{{$guid}}"
     },
     {
       "lineNumber": 2,
-      "startOffset": 33,
-      "endOffset": 44,
-      "text": "    ?page=2"
+      "startOffset": 44,
+      "endOffset": 71,
+      "text": "X-Timestamp: {{$timestamp}}"
     },
     {
       "lineNumber": 3,
-      "startOffset": 45,
-      "endOffset": 61,
-      "text": "    &pageSize=10"
+      "startOffset": 72,
+      "endOffset": 101,
+      "text": "X-Date: {{$datetime iso8601}}"
     }
   ],
   "segments": [
@@ -38,27 +38,27 @@
         {
           "lineNumber": 1,
           "startOffset": 0,
-          "endOffset": 32,
-          "text": "GET https://example.com/comments"
+          "endOffset": 43,
+          "text": "GET https://api.example.com/users/{{$guid}}"
         },
         {
           "lineNumber": 2,
-          "startOffset": 33,
-          "endOffset": 44,
-          "text": "    ?page=2"
+          "startOffset": 44,
+          "endOffset": 71,
+          "text": "X-Timestamp: {{$timestamp}}"
         },
         {
           "lineNumber": 3,
-          "startOffset": 45,
-          "endOffset": 61,
-          "text": "    &pageSize=10"
+          "startOffset": 72,
+          "endOffset": 101,
+          "text": "X-Date: {{$datetime iso8601}}"
         }
       ]
     }
   ],
   "ast": {
     "metadata": {
-      "length": 61,
+      "length": 101,
       "lines": 3,
       "encoding": "UTF-8",
       "source": {
@@ -70,22 +70,22 @@
       {
         "name": null,
         "method": "GET",
-        "url": "https://example.com/comments",
+        "url": "https://api.example.com/users/{{$guid}}",
         "httpVersion": null,
-        "queryParams": [
+        "queryParams": [],
+        "headers": [
           {
-            "key": "page",
-            "value": "2"
+            "name": "X-Timestamp",
+            "value": "{{$timestamp}}"
           },
           {
-            "key": "pageSize",
-            "value": "10"
+            "name": "X-Date",
+            "value": "{{$datetime iso8601}}"
           }
         ],
-        "headers": [],
         "body": null,
         "variables": {
-          "fileVariable": [],
+          "file": [],
           "prompt": [],
           "request": []
         },

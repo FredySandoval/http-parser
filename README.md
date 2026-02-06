@@ -28,7 +28,7 @@ npm install @fredy/http-parser
 ```typescript
 import { parseHttp } from '@fredy/http-parser';
 
-const result = parseHttp(`GET https://api.example.com/users
+const result: ParseResult = parseHttp(`GET https://api.example.com/users
 Authorization: Bearer token123
 Content-Type: application/json
 
@@ -37,35 +37,6 @@ Content-Type: application/json
 }`);
 
 console.dir(result, { depth: null });
-```
-
-### Using the Parser Class
-
-```typescript
-import { HttpRequestParser } from '@fredy/http-parser';
-
-const parser = new HttpRequestParser({ 
-  encoding: 'UTF-8', 
-  strict: false 
-});
-
-// Parse from string
-const textResult = parser.parseText('GET https://example.com');
-
-// Parse from stream
-const streamResult = await parser.parseStream(readableStream);
-```
-
-### Stream Parsing
-
-```typescript
-import { parseHttpStream } from '@fredy/http-parser';
-import fs from 'fs';
-
-const stream = fs.createReadStream('requests.http');
-const result = await parseHttpStream(stream);
-
-console.log(result.ast.requests.length);
 ```
 
 ## Output Structure
@@ -81,10 +52,27 @@ interface ParseResult {
   ast: HttpRequestAST;
 }
 
+interface ParseMetadata {
+  length: number;
+  lines: number;
+  encoding: string;
+  source: SourceMetadata;
+}
+
+interface SourceMetadata {
+  type: 'string' | 'stream';
+  name?: string;
+}
+
+interface LineContext {
+  lineNumber: number;
+  startOffset: number;
+  endOffset: number;
+  text: string;
+}
+
 interface HttpRequestAST {
-  metadata: ParseMetadata;
   requests: Request[];
-  fileVariables: FileVariable[];
 }
 
 interface Request {
@@ -94,17 +82,58 @@ interface Request {
   httpVersion: string | null;
   queryParams: QueryParam[];
   headers: Header[];
-  body: Body | null;
+  body: BodyObject | null;
   variables: {
-    file: FileVariable[];
-    prompt: PromptVariable[];
-    request: RequestVariable[];
+    fileVariables: FileVariable[];
   };
-  settings: RequestSetting[];
   comments: string[];
   rawTextRange: { startLine, endLine };
   expectedResponse: ExpectedResponse | null;
 }
+
+interface ExpectedResponse {
+  statusCode: number;
+  statusText: string | null;
+  httpVersion: string | null;
+  headers: Header[];
+  body: string | object | null;
+  variables: {
+    fileVariables: FileVariable[];
+  };
+  rawTextRange: {
+    startLine: number;
+    endLine: number;
+  };
+}
+
+interface FileVariable {
+  key: string;
+  value: string;
+  lineNumber: number;
+}
+
+interface BodyObject {
+  type: 'raw' | 'file-ref' | 'form-urlencoded' | 'graphql';
+  raw?: string;
+  fileRef?: FileReference;
+  graphql?: GraphQLBody;
+  formParams?: FormParam[];
+}
+
+interface FileReference {
+  path: string;
+  encoding?: string;
+  processVariables: boolean;
+}
+interface GraphQLBody {
+  query: string;
+  variables?: string;
+}
+interface FormParam {
+  key: string;
+  value: string;
+}
+
 ```
 
 ## Supported Syntax
@@ -123,46 +152,6 @@ Content-Type: application/json
 }
 ```
 
-#### GraphQL Request
-
-```http
-POST https://api.example.com/graphql
-X-REQUEST-TYPE: GraphQL
-Content-Type: application/json
-
-query GetUser($id: ID!) {
-  user(id: $id) {
-    name
-    email
-  }
-}
-
-{
-  "id": "123"
-}
-```
-
-#### cURL Request
-
-```http
-curl -X POST https://api.example.com/users \
-  -H "Content-Type: application/json" \
-  -d '{"name": "Jane Doe"}'
-```
-
-#### File Reference Body
-
-```http
-POST https://api.example.com/upload
-Content-Type: application/json
-
-<@ ./data.json
-```
-
-## Variable System
-
-The parser supports various types of variables:
-
 ### File Variables
 
 ```http
@@ -171,49 +160,6 @@ The parser supports various types of variables:
 
 GET {{baseUrl}}/users
 Authorization: Bearer {{token}}
-```
-
-### Prompt Variables
-
-```http
-# @prompt username Your username
-# @prompt password Your password (will be masked)
-
-POST https://api.example.com/login
-Content-Type: application/json
-
-{
-  "username": "{{username}}",
-  "password": "{{password}}"
-}
-```
-
-### Request Variables
-
-```http
-# @name login
-POST https://api.example.com/login
-Content-Type: application/json
-
-{
-  "username": "test",
-  "password": "test"
-}
-
-###
-
-@authToken = {{login.response.headers.X-Auth-Token}}
-
-GET https://api.example.com/users
-Authorization: Bearer {{authToken}}
-```
-
-### System Variables
-
-```http
-GET https://api.example.com/users/{{$guid}}
-X-Timestamp: {{$timestamp}}
-X-Date: {{$datetime iso8601}}
 ```
 
 ## Development

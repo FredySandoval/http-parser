@@ -1,0 +1,14 @@
+POST https://api.example.com/graphql
+X-REQUEST-TYPE: GraphQL
+Content-Type: application/json
+
+query GetUser($id: ID!) {
+  user(id: $id) {
+    name
+    email
+  }
+}
+
+{
+  "id": "123"
+}

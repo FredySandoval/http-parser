@@ -1,0 +1,5 @@
+@baseUrl = https://api.example.com
+@token = abc123
+
+GET {{baseUrl}}/users
+Authorization: Bearer {{token}}

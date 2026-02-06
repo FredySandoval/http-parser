@@ -65,7 +65,7 @@ export class SegmentParser {
             ? { type: 'raw', raw: curlResult.body.raw }
             : null,
           variables: {
-            file: variablesResult.fileVariables,
+            fileVariable: variablesResult.fileVariables,
             prompt: variablesResult.prompts,
             request: enrichedLines
               .flatMap((l) => l.variables)
@@ -133,7 +133,7 @@ export class SegmentParser {
           headers: headerResult.headers,
           body: body.type === 'raw' && body.raw === '' ? null : body,
           variables: {
-            file: variablesResult.fileVariables,
+            fileVariable: variablesResult.fileVariables,
             prompt: variablesResult.prompts,
             request: enrichedLines
               .flatMap((l) => l.variables)
@@ -203,7 +203,7 @@ export class SegmentParser {
               : body.raw
             : null, // Spec says string | object, non-raw bodies return null
         variables: {
-          file: variablesResult.fileVariables,
+          fileVariable: variablesResult.fileVariables,
         },
         rawTextRange: {
           startLine: segment.startLine,

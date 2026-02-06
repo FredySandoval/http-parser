@@ -1,0 +1,145 @@
+{
+  "text": "@baseUrl = https://api.example.com\n@token = abc123\n\nGET {{baseUrl}}/users\nAuthorization: Bearer {{token}}",
+  "metadata": {
+    "length": 105,
+    "lines": 5,
+    "encoding": "UTF-8",
+    "source": {
+      "type": "string",
+      "name": "raw"
+    }
+  },
+  "lineContexts": [
+    {
+      "lineNumber": 1,
+      "startOffset": 0,
+      "endOffset": 34,
+      "text": "@baseUrl = https://api.example.com"
+    },
+    {
+      "lineNumber": 2,
+      "startOffset": 35,
+      "endOffset": 50,
+      "text": "@token = abc123"
+    },
+    {
+      "lineNumber": 3,
+      "startOffset": 51,
+      "endOffset": 51,
+      "text": ""
+    },
+    {
+      "lineNumber": 4,
+      "startOffset": 52,
+      "endOffset": 73,
+      "text": "GET {{baseUrl}}/users"
+    },
+    {
+      "lineNumber": 5,
+      "startOffset": 74,
+      "endOffset": 105,
+      "text": "Authorization: Bearer {{token}}"
+    }
+  ],
+  "segments": [
+    {
+      "segmentId": 0,
+      "startLine": 1,
+      "endLine": 5,
+      "lines": [
+        {
+          "lineNumber": 1,
+          "startOffset": 0,
+          "endOffset": 34,
+          "text": "@baseUrl = https://api.example.com"
+        },
+        {
+          "lineNumber": 2,
+          "startOffset": 35,
+          "endOffset": 50,
+          "text": "@token = abc123"
+        },
+        {
+          "lineNumber": 3,
+          "startOffset": 51,
+          "endOffset": 51,
+          "text": ""
+        },
+        {
+          "lineNumber": 4,
+          "startOffset": 52,
+          "endOffset": 73,
+          "text": "GET {{baseUrl}}/users"
+        },
+        {
+          "lineNumber": 5,
+          "startOffset": 74,
+          "endOffset": 105,
+          "text": "Authorization: Bearer {{token}}"
+        }
+      ]
+    }
+  ],
+  "ast": {
+    "metadata": {
+      "length": 105,
+      "lines": 5,
+      "encoding": "UTF-8",
+      "source": {
+        "type": "string",
+        "name": "raw"
+      }
+    },
+    "requests": [
+      {
+        "name": null,
+        "method": "GET",
+        "url": "{{baseUrl}}/users",
+        "httpVersion": null,
+        "queryParams": [],
+        "headers": [
+          {
+            "name": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": null,
+        "variables": {
+          "file": [
+            {
+              "key": "baseUrl",
+              "value": "https://api.example.com",
+              "lineNumber": 1
+            },
+            {
+              "key": "token",
+              "value": "abc123",
+              "lineNumber": 2
+            }
+          ],
+          "prompt": [],
+          "request": []
+        },
+        "settings": [],
+        "comments": [],
+        "rawTextRange": {
+          "startLine": 1,
+          "endLine": 5
+        },
+        "expectedResponse": null
+      }
+    ],
+    "fileVariables": [
+      {
+        "key": "baseUrl",
+        "value": "https://api.example.com",
+        "lineNumber": 1
+      },
+      {
+        "key": "token",
+        "value": "abc123",
+        "lineNumber": 2
+      }
+    ]
+  }
+}

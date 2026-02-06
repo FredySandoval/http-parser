@@ -1,0 +1,15 @@
+# @name login
+POST https://api.example.com/login
+Content-Type: application/json
+
+{
+  "username": "test",
+  "password": "test"
+}
+
+###
+
+@authToken = {{login.response.headers.X-Auth-Token}}
+
+GET https://api.example.com/users
+Authorization: Bearer {{authToken}}

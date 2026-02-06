@@ -1,0 +1,4 @@
+POST https://api.example.com/upload
+Content-Type: application/json
+
+<@ ./data.json

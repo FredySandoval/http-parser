@@ -52,7 +52,7 @@
         "headers": [],
         "body": null,
         "variables": {
-          "file": [],
+          "fileVariable": [],
           "prompt": [],
           "request": []
         },
