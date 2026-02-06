@@ -125,10 +125,12 @@ interface FileReference {
   encoding?: string;
   processVariables: boolean;
 }
+
 interface GraphQLBody {
   query: string;
   variables?: string;
 }
+
 interface FormParam {
   key: string;
   value: string;
