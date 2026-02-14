@@ -1,183 +1,133 @@
-import type { LineContext } from './line-scanner';
+import type {
+  FileComment,
+  FileVariable,
+  ScanResult,
+  Segment,
+} from '../types/types';
 
 /**
- * Represents a file-scoped variable definition.
- * Example: @baseUrl = https://api.com
- */
-export interface FileVariable {
-  key: string;
-  value: string;
-  lineNumber: number;
-}
-
-/**
- * Represents a prompt variable definition.
- * Example: # @prompt otp Enter code
- */
-export interface PromptVariable {
-  name: string;
-  description: string | null;
-  lineNumber: number;
-}
-
-/**
- * Represents a request setting.
- * Example: # @no-redirect
- */
-export interface RequestSetting {
-  name: string;
-  value: string | null;
-  lineNumber: number;
-}
-
-/**
- * Result of scanning a segment for variables and metadata.
- */
-export interface VariableScanResult {
-  requestName: string | null;
-  requestNameLine: number | null;
-  fileVariables: FileVariable[];
-  prompts: PromptVariable[];
-  settings: RequestSetting[];
-}
-
-/**
- * VariableScanner
- * Scans lines for variable definitions, request names, prompts, and settings.
+ * input: [
+ *   { segmentId: 0, startLine: 1, endLine: 3, lines: [...] },
+ *   { segmentId: 1, startLine: 5, endLine: 7, lines: [...] }
+ * ]
+ * output: {
+ *   fileVariables: [
+ *     { key: 'baseUrl', value: 'https://api.example.com', lineNumber: 1, segmentId: null },
+ *     { key: 'contentType', value: 'application/json', lineNumber: 2, segmentId: null },
+ *     { key: 'baseUrl', value: 'http://localhost:3000', lineNumber: 6, segmentId: 1 }
+ *   ],
+ *   fileComments: [
+ *     { text: 'Use the created user ID', lineNumber: 4, segmentId: null }
+ *   ]
+ * }
  */
 export class VariableScanner {
   /**
-   * Helper to unescape string values (e.g. \n -> newline)
+   * Pattern to match variable definitions: @name = value
+   * Matches @ at start of line, followed by name, optional whitespace, =, optional whitespace, value
+   * Value can be empty (.* matches zero or more characters)
    */
-  private unescape(value: string): string {
-    return value
-      .replace(/\\n/g, '\n')
-      .replace(/\\r/g, '\r')
-      .replace(/\\t/g, '\t')
-      .replace(/\\\\/g, '\\');
-  }
+  private static readonly VARIABLE_PATTERN = /^\s*@(\w+)\s*=\s*(.*)$/;
 
   /**
-   * Scans the lines of a segment to extract variables and metadata.
-   *
-   * @param lines - Array of LineContext objects to scan
-   * @returns VariableScanResult containing extracted data
+   * Pattern to match comment lines: # comment text
+   * Must start with # and have content after optional whitespace
    */
-  scan(lines: LineContext[]): VariableScanResult {
-    const result: VariableScanResult = {
-      requestName: null,
-      requestNameLine: null,
-      fileVariables: [],
-      prompts: [],
-      settings: [],
+  private static readonly COMMENT_PATTERN = /^\s*#\s*(.+)$/;
+
+  scan(segments: Segment[]): ScanResult {
+    const result: ScanResult = {
+      fileVariables: this.scanFileVariables(segments),
+      fileComments: this.scanFileComments(segments),
     };
+    return result;
+  }
 
-    for (const line of lines) {
-      const text = line.text.trim();
-      if (!text) continue;
+  private scanFileVariables(segments: Segment[]): FileVariable[] {
+    const variables: FileVariable[] = [];
 
-      // 1. File Variables: @variableName = value
-      if (text.startsWith('@') && text.includes('=')) {
-        const equalIndex = text.indexOf('=');
-        const key = text.substring(1, equalIndex).trim();
-        // Variable name cannot contain spaces
-        if (!key.includes(' ')) {
-          let value = text.substring(equalIndex + 1).trim();
-          value = this.unescape(value);
-          result.fileVariables.push({
-            key,
-            value,
+    for (const segment of segments) {
+      for (const line of segment.lines) {
+        const match = line.text.match(VariableScanner.VARIABLE_PATTERN);
+        if (match && match[1]) {
+          variables.push({
+            key: match[1],
+            value: match[2]?.trim() ?? '',
             lineNumber: line.lineNumber,
+            segmentId: segment.segmentId,
           });
-          continue;
-        }
-      }
-
-      // 2. Comments/Directives: # ... or // ...
-      if (text.startsWith('#') || text.startsWith('//')) {
-        const cleanText = text.replace(/^(#|\/\/)\s*/, '').trim();
-
-        // 2a. Request Name: @name requestName
-        if (cleanText.startsWith('@name ')) {
-          result.requestName = cleanText.substring(6).trim();
-          result.requestNameLine = line.lineNumber;
-          continue;
-        }
-
-        // 2b. Prompt: @prompt varName [description]
-        if (cleanText.startsWith('@prompt ')) {
-          const parts = cleanText.substring(8).trim().split(/\s+/);
-          if (parts.length > 0) {
-            const name = parts[0];
-            if (name) {
-              const description = parts.slice(1).join(' ') || null;
-              result.prompts.push({
-                name,
-                description,
-                lineNumber: line.lineNumber,
-              });
-            }
-          }
-          continue;
-        }
-
-        // 2c. Settings: @settingName [value]
-        // Known settings: @note, @no-redirect, @no-cookie-jar
-        // But generally anything starting with @ that is NOT name or prompt in a comment block
-        if (cleanText.startsWith('@')) {
-          const parts = cleanText.split(/\s+/);
-          const settingNamePart = parts[0];
-
-          if (settingNamePart) {
-            const settingName = settingNamePart.substring(1); // remove @
-
-            // Filter out @name and @prompt if they somehow got here (already handled above)
-            if (settingName === 'name' || settingName === 'prompt') continue;
-
-            const settingValue = parts.slice(1).join(' ') || null;
-            result.settings.push({
-              name: settingName,
-              value: settingValue,
-              lineNumber: line.lineNumber,
-            });
-          }
-          continue;
         }
       }
     }
 
-    return result;
+    return variables;
+  }
+
+  private scanFileComments(segments: Segment[]): FileComment[] {
+    const comments: FileComment[] = [];
+
+    for (const segment of segments) {
+      for (const line of segment.lines) {
+        const match = line.text.match(VariableScanner.COMMENT_PATTERN);
+        if (match && match[1]) {
+          comments.push({
+            text: match[1].trim(),
+            lineNumber: line.lineNumber,
+            segmentId: segment.segmentId,
+          });
+        }
+      }
+    }
+
+    return comments;
   }
 }
 
 /**
- * VariableRegistry
- * Stores and manages variable values.
+ * manages variable storage and retrieval
  */
 export class VariableRegistry {
-  private variables = new Map<string, string>();
+  private variables: Map<string, string> = new Map();
+  private segmentVariables: Map<number, Map<string, string>> = new Map();
 
-  /**
-   * Retrieves the value of a stored variable.
-   * @param name - The name of the variable
-   */
   get(name: string): string | undefined {
     return this.variables.get(name);
   }
 
-  /**
-   * Stores or updates a variable value.
-   * @param name - The name of the variable
-   * @param value - The value to store
-   */
   set(name: string, value: string): void {
     this.variables.set(name, value);
   }
 
-  /**
-   * Returns all currently stored variables.
-   */
+  getAllBySegmentId(id: number): Record<string, string> {
+    const segmentMap = this.segmentVariables.get(id);
+    if (!segmentMap) {
+      return {};
+    }
+    return Object.fromEntries(segmentMap);
+  }
+
   getAll(): Record<string, string> {
     return Object.fromEntries(this.variables);
+  }
+
+  /**
+   * Sets a variable for a specific segment
+   */
+  setForSegment(segmentId: number, name: string, value: string): void {
+    if (!this.segmentVariables.has(segmentId)) {
+      this.segmentVariables.set(segmentId, new Map());
+    }
+    this.segmentVariables.get(segmentId)!.set(name, value);
+  }
+
+  /**
+   * Gets a variable, checking segment-specific first, then global
+   */
+  getWithSegment(segmentId: number, name: string): string | undefined {
+    const segmentMap = this.segmentVariables.get(segmentId);
+    if (segmentMap?.has(name)) {
+      return segmentMap.get(name);
+    }
+    return this.variables.get(name);
   }
 }

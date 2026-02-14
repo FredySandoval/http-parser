@@ -1,20 +1,5 @@
-import type { LineContext } from '../scanner/line-scanner';
+import type { LineContext, QueryParam, QueryParserResult } from "../types/types";
 
-/**
- * QueryParam represents a single query parameter key-value pair.
- */
-export interface QueryParam {
-  key: string;
-  value: string;
-}
-
-/**
- * Result of the query continuation parsing.
- */
-export interface QueryParserResult {
-  queryParams: QueryParam[];
-  consumedLinesCount: number;
-}
 
 /**
  * QueryParser handles parsing of multiline query continuations.

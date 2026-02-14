@@ -1,0 +1,181 @@
+{
+  "text": "@baseUrl = http://localhost:8080\n###\n@baseUrl = http://localhost:8080/scoped\nGET {{baseUrl}}/x HTTP/1.1\n###\nGET {{baseUrl}}/notscoped HTTP/1.1\n",
+  "metadata": {
+    "length": 143,
+    "lines": 7,
+    "encoding": "utf-8",
+    "source": {
+      "type": "string"
+    }
+  },
+  "lineContexts": [
+    {
+      "lineNumber": 1,
+      "startOffset": 0,
+      "endOffset": 32,
+      "text": "@baseUrl = http://localhost:8080"
+    },
+    {
+      "lineNumber": 2,
+      "startOffset": 33,
+      "endOffset": 36,
+      "text": "###"
+    },
+    {
+      "lineNumber": 3,
+      "startOffset": 37,
+      "endOffset": 76,
+      "text": "@baseUrl = http://localhost:8080/scoped"
+    },
+    {
+      "lineNumber": 4,
+      "startOffset": 77,
+      "endOffset": 103,
+      "text": "GET {{baseUrl}}/x HTTP/1.1"
+    },
+    {
+      "lineNumber": 5,
+      "startOffset": 104,
+      "endOffset": 107,
+      "text": "###"
+    },
+    {
+      "lineNumber": 6,
+      "startOffset": 108,
+      "endOffset": 142,
+      "text": "GET {{baseUrl}}/notscoped HTTP/1.1"
+    },
+    {
+      "lineNumber": 7,
+      "startOffset": 143,
+      "endOffset": 143,
+      "text": ""
+    }
+  ],
+  "segments": [
+    {
+      "segmentId": 0,
+      "startLine": 1,
+      "endLine": 1,
+      "lines": [
+        {
+          "lineNumber": 1,
+          "startOffset": 0,
+          "endOffset": 32,
+          "text": "@baseUrl = http://localhost:8080"
+        }
+      ]
+    },
+    {
+      "segmentId": 1,
+      "startLine": 3,
+      "endLine": 4,
+      "lines": [
+        {
+          "lineNumber": 3,
+          "startOffset": 37,
+          "endOffset": 76,
+          "text": "@baseUrl = http://localhost:8080/scoped"
+        },
+        {
+          "lineNumber": 4,
+          "startOffset": 77,
+          "endOffset": 103,
+          "text": "GET {{baseUrl}}/x HTTP/1.1"
+        }
+      ]
+    },
+    {
+      "segmentId": 2,
+      "startLine": 6,
+      "endLine": 7,
+      "lines": [
+        {
+          "lineNumber": 6,
+          "startOffset": 108,
+          "endOffset": 142,
+          "text": "GET {{baseUrl}}/notscoped HTTP/1.1"
+        },
+        {
+          "lineNumber": 7,
+          "startOffset": 143,
+          "endOffset": 143,
+          "text": ""
+        }
+      ]
+    }
+  ],
+  "ast": {
+    "requests": [
+      {
+        "name": null,
+        "method": "GET",
+        "url": "{{baseUrl}}/x",
+        "httpVersion": "HTTP/1.1",
+        "queryParams": [],
+        "headers": [],
+        "body": null,
+        "blockVariables": {
+          "fileVariables": [
+            {
+              "key": "baseUrl",
+              "value": "http://localhost:8080/scoped",
+              "lineNumber": 3,
+              "segmentId": null
+            }
+          ]
+        },
+        "comments": [],
+        "rawTextRange": {
+          "startLine": 3,
+          "endLine": 4
+        },
+        "expectedResponse": null
+      },
+      {
+        "name": null,
+        "method": "GET",
+        "url": "{{baseUrl}}/notscoped",
+        "httpVersion": "HTTP/1.1",
+        "queryParams": [],
+        "headers": [],
+        "body": null,
+        "blockVariables": {
+          "fileVariables": []
+        },
+        "comments": [],
+        "rawTextRange": {
+          "startLine": 6,
+          "endLine": 7
+        },
+        "expectedResponse": null
+      }
+    ],
+    "fileScopedVariables": {
+      "fileVariables": [
+        {
+          "key": "baseUrl",
+          "value": "http://localhost:8080",
+          "lineNumber": 1,
+          "segmentId": 0
+        }
+      ]
+    },
+    "globalVariables": {
+      "fileVariables": [
+        {
+          "key": "baseUrl",
+          "value": "http://localhost:8080",
+          "lineNumber": 1,
+          "segmentId": 0
+        },
+        {
+          "key": "baseUrl",
+          "value": "http://localhost:8080/scoped",
+          "lineNumber": 3,
+          "segmentId": 1
+        }
+      ]
+    }
+  }
+}

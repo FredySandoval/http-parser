@@ -1,67 +1,52 @@
-import type { LineContext } from '../scanner/line-scanner';
-import type { Segment } from './segmenter';
-
-/**
- * Valid types for a segment.
- */
-export type SegmentType = 'request' | 'response';
-
-/**
- * Valid subtypes for a segment.
- */
-export type SegmentSubtype = 'http' | 'curl' | 'graphql';
-
-/**
- * Represents a segment that has been classified with type and subtype.
- */
-export interface ClassifiedSegment extends Segment {
-  /** Whether this is a request or a response */
-  type: SegmentType;
-  /** Specific flavor of request (e.g., standard HTTP or cURL) */
-  subtype: SegmentSubtype;
-  /** Metadata about the first line that contains actual content */
-  firstNonEmptyLine: {
-    lineNumber: number;
-    text: string;
-  };
-}
+import type {
+  ClassifiedSegment,
+  LineContext,
+  MessageType,
+  Segment,
+  SegmentType,
+} from '../types/types';
 
 /**
  * SegmentClassifier Class
  * Differentiates between HTTP requests and expected responses.
- * Also identifies if a request is a standard HTTP request or a cURL command.
+ * Also identifies if a request is a standard HTTP request, cURL command, or GraphQL.
  *
  * According to the specification:
  * - A segment is a response if its first non-empty line starts with "HTTP/"
  * - A segment is a cURL request if its first non-empty line starts with "curl"
+ * - A segment is a GraphQL request if the X-REQUEST-TYPE: GraphQL header is present
  */
 export class SegmentClassifier {
   /**
-   * Classifies a collection of raw segments.
+   * input: Segment[]
+   * output: ClassifiedSegment[]
    *
-   * @param segments - Array of raw Segment objects from Segmenter
-   * @returns Array of ClassifiedSegment objects
+   * Processes each segment and classifies it
    */
   classify(segments: Segment[]): ClassifiedSegment[] {
     return segments.map((segment) => this.classifySegment(segment));
   }
 
   /**
-   * Classifies a single segment to determine its type and subtype.
+   * input: single Segment
+   * output: ClassifiedSegment
    *
-   * @param segment - A single Segment object
-   * @returns A ClassifiedSegment object
+   * Finds the first significant (non-empty) line
+   * Detects the type (request vs response)
+   * Detects the subtype (http | curl | graphql)
+   * Returns classified segment with metadata
    */
   classifySegment(segment: Segment): ClassifiedSegment {
     const significantLine = this.findSignificantLine(segment.lines);
 
+    // fallback!
     // If for some reason we have a segment with no significant lines
     // (though Segmenter should have filtered these out), default to request/http
     if (!significantLine) {
       return {
         ...segment,
-        type: 'request',
-        subtype: 'http',
+        messageType: 'request',
+        segmentType: 'http',
         firstNonEmptyLine: {
           lineNumber: segment.startLine,
           text: '',
@@ -69,16 +54,16 @@ export class SegmentClassifier {
       };
     }
 
-    const type = this.detectType(significantLine.text);
-
-    // Find the index of the significant line to start scanning for headers if needed
-    const significantLineIndex = segment.lines.indexOf(significantLine);
-    const subtype = this.detectSubtype(segment.lines, significantLineIndex);
+    const type = this.detectMessageType(significantLine.text);
+    const significantLineIndex = segment.lines.findIndex(
+      (line) => line.lineNumber === significantLine.lineNumber
+    );
+    const subtype = this.detectSegmentType(segment.lines, significantLineIndex);
 
     return {
       ...segment,
-      type,
-      subtype,
+      messageType: type,
+      segmentType: subtype,
       firstNonEmptyLine: {
         lineNumber: significantLine.lineNumber,
         text: significantLine.text,
@@ -87,14 +72,18 @@ export class SegmentClassifier {
   }
 
   /**
-   * Scans through lines to find the first one that isn't just whitespace.
-   *
-   * @param lines - Array of LineContext objects
-   * @returns The first non-empty LineContext found, or null if none exist
+   * Finds first significant line in a segment
+   * Scans lines to find first with non-whitespace content that is not a comment or directive
    */
   private findSignificantLine(lines: LineContext[]): LineContext | null {
     for (const line of lines) {
-      if (line.text.trim().length > 0) {
+      const trimmed = line.text.trim();
+      // Skip empty lines, comments (starting with #), and directives (starting with @)
+      if (
+        trimmed.length > 0 &&
+        !trimmed.startsWith('#') &&
+        !trimmed.startsWith('@')
+      ) {
         return line;
       }
     }
@@ -102,12 +91,15 @@ export class SegmentClassifier {
   }
 
   /**
-   * Detects if a line of text represents a request or a response.
+   * Detects if a line represents a request or response
    *
-   * @param text - The text content of a line
-   * @returns "request" or "response"
+   * input: "HTTP/1.1 200 OK"
+   * output: "response"
+   *
+   * input: "POST /api/users HTTP/1.1"
+   * output: "request"
    */
-  private detectType(text: string): SegmentType {
+  private detectMessageType(text: string): MessageType {
     const normalized = text.trimStart().toUpperCase();
     if (normalized.startsWith('HTTP/')) {
       return 'response';
@@ -116,16 +108,15 @@ export class SegmentClassifier {
   }
 
   /**
-   * Detects the subtype of a request (standard HTTP, cURL, or GraphQL).
+   * Detects the subtype of a request
    *
-   * @param lines - All lines in the segment
-   * @param significantLineIndex - The index of the first non-empty line
-   * @returns "http", "curl", or "graphql"
+   * input: lines, first line index
+   * output: "http" | "curl" | "graphql"
    */
-  private detectSubtype(
+  private detectSegmentType(
     lines: LineContext[],
     significantLineIndex: number
-  ): SegmentSubtype {
+  ): SegmentType {
     const significantLine = lines[significantLineIndex];
     if (!significantLine) {
       return 'http';

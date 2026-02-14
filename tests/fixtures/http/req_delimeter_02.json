@@ -3,10 +3,9 @@
   "metadata": {
     "length": 246,
     "lines": 16,
-    "encoding": "UTF-8",
+    "encoding": "utf-8",
     "source": {
-      "type": "string",
-      "name": "raw"
+      "type": "string"
     }
   },
   "lineContexts": [
@@ -209,15 +208,6 @@
     }
   ],
   "ast": {
-    "metadata": {
-      "length": 246,
-      "lines": 16,
-      "encoding": "UTF-8",
-      "source": {
-        "type": "string",
-        "name": "raw"
-      }
-    },
     "requests": [
       {
         "name": null,
@@ -227,12 +217,9 @@
         "queryParams": [],
         "headers": [],
         "body": null,
-        "variables": {
-          "fileVariables": [],
-          "prompt": [],
-          "request": []
+        "blockVariables": {
+          "fileVariables": []
         },
-        "settings": [],
         "comments": [],
         "rawTextRange": {
           "startLine": 2,
@@ -248,12 +235,9 @@
         "queryParams": [],
         "headers": [],
         "body": null,
-        "variables": {
-          "fileVariables": [],
-          "prompt": [],
-          "request": []
+        "blockVariables": {
+          "fileVariables": []
         },
-        "settings": [],
         "comments": [],
         "rawTextRange": {
           "startLine": 5,
@@ -274,15 +258,24 @@
           }
         ],
         "body": {
-          "type": "raw",
-          "raw": "{\n    \"name\": \"sample\",\n    \"time\": \"Wed, 21 Oct 2015 18:27:50 GMT\"\n}"
+          "status": "parsed",
+          "content": {
+            "protocol": "http",
+            "body": {
+              "kind": "json",
+              "data": {
+                "name": "sample",
+                "time": "Wed, 21 Oct 2015 18:27:50 GMT"
+              }
+            }
+          },
+          "raw": "{\n    \"name\": \"sample\",\n    \"time\": \"Wed, 21 Oct 2015 18:27:50 GMT\"\n}",
+          "contentType": "application/json",
+          "size": 69
         },
-        "variables": {
-          "fileVariables": [],
-          "prompt": [],
-          "request": []
+        "blockVariables": {
+          "fileVariables": []
         },
-        "settings": [],
         "comments": [],
         "rawTextRange": {
           "startLine": 9,
@@ -291,6 +284,11 @@
         "expectedResponse": null
       }
     ],
-    "fileVariables": []
+    "fileScopedVariables": {
+      "fileVariables": []
+    },
+    "globalVariables": {
+      "fileVariables": []
+    }
   }
 }

@@ -1,5 +1,5 @@
 import { test, expect, describe } from 'bun:test';
-import { RequestLineParser } from '../../src/parsers/request-line';
+import { HTTPRequestLineParser } from '../../src/parsers/request-line';
 import { LineScanner } from '../../src/scanner/line-scanner';
 
 describe('RequestLineParser', () => {
@@ -7,7 +7,7 @@ describe('RequestLineParser', () => {
     test('should parse full RFC style request line', () => {
       const scanner = new LineScanner();
       const lines = scanner.scan('POST https://example.com/comments HTTP/1.1');
-      const parser = new RequestLineParser();
+      const parser = new HTTPRequestLineParser();
 
       const result = parser.parse(lines[0]!.text);
 
@@ -21,7 +21,7 @@ describe('RequestLineParser', () => {
     test('should parse request line without HTTP version', () => {
       const scanner = new LineScanner();
       const lines = scanner.scan('GET https://example.com/comments');
-      const parser = new RequestLineParser();
+      const parser = new HTTPRequestLineParser();
 
       const result = parser.parse(lines[0]!.text);
 
@@ -37,12 +37,12 @@ describe('RequestLineParser', () => {
     test('should default to GET for URL-only line', () => {
       const scanner = new LineScanner();
       const lines = scanner.scan('https://example.com/comments');
-      const parser = new RequestLineParser();
+      const parser = new HTTPRequestLineParser();
 
       const result = parser.parse(lines[0]!.text);
 
       expect(result).toEqual({
-        method: 'GET',
+        method: null,
         url: 'https://example.com/comments',
         httpVersion: null,
       });
@@ -51,12 +51,12 @@ describe('RequestLineParser', () => {
     test('should handle relative paths as URL only', () => {
       const scanner = new LineScanner();
       const lines = scanner.scan('/api/users');
-      const parser = new RequestLineParser();
+      const parser = new HTTPRequestLineParser();
 
       const result = parser.parse(lines[0]!.text);
 
       expect(result).toEqual({
-        method: 'GET',
+        method: null,
         url: '/api/users',
         httpVersion: null,
       });
@@ -64,26 +64,21 @@ describe('RequestLineParser', () => {
   });
 
   describe('custom methods', () => {
-    test('should parse custom method', () => {
+    test('should not parse custom method', () => {
       const scanner = new LineScanner();
       const lines = scanner.scan('PURGE /cache');
-      const parser = new RequestLineParser();
+      const parser = new HTTPRequestLineParser();
 
-      const result = parser.parse(lines[0]!.text);
-
-      expect(result).toEqual({
-        method: 'PURGE',
-        url: '/cache',
-        httpVersion: null,
-      });
+      expect(() => parser.parse(lines[0]!.text)).toThrow('Invalid request line: PURGE /cache');
     });
   });
+
 
   describe('edge cases', () => {
     test('should handle extra whitespace', () => {
       const scanner = new LineScanner();
       const lines = scanner.scan('  POST   /api/data   HTTP/1.1  ');
-      const parser = new RequestLineParser();
+      const parser = new HTTPRequestLineParser();
 
       const result = parser.parse(lines[0]!.text);
 
@@ -94,19 +89,13 @@ describe('RequestLineParser', () => {
       });
     });
 
-    test('should return empty URL if input is empty', () => {
+    test('should return error on empty URL', () => {
       // LineScanner returns empty line for empty input
       const scanner = new LineScanner();
       const lines = scanner.scan('');
-      const parser = new RequestLineParser();
+      const parser = new HTTPRequestLineParser();
 
-      const result = parser.parse(lines[0]!.text);
-
-      expect(result).toEqual({
-        method: 'GET',
-        url: '',
-        httpVersion: null,
-      });
+      expect(() => parser.parse(lines[0]!.text)).toThrow('Invalid request line: ');
     });
   });
 });

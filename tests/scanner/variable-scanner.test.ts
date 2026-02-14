@@ -11,130 +11,242 @@ const segmenter = new Segmenter();
 const variableScanner = new VariableScanner();
 
 describe('VariableScanner', () => {
-  test('should extract request name from # @name comment', () => {
-    const input = `
-# @name login
-POST https://api.com/login
-`.trim();
-    const lines = scanner.scan(input);
-    const segmentLines = segmenter.segment(lines)[0]!.lines;
-    const result = variableScanner.scan(segmentLines);
+  describe('file variables', () => {
+    test('should ignore malformed file variables (spaces in key)', () => {
+      const text = `@base url = https://api.example.com`;
+      const lines = scanner.scan(text);
+      const segments = segmenter.segment(lines);
+      const result = variableScanner.scan(segments);
 
-    expect(result.requestName).toBe('login');
-    expect(result.requestNameLine).toBeDefined();
-  });
-
-  test('should extract request name from // @name comment', () => {
-    const input = `
-// @name getItem
-GET https://api.com/items/1
-`.trim();
-    const lines = scanner.scan(input);
-    const segmentLines = segmenter.segment(lines)[0]!.lines;
-    const result = variableScanner.scan(segmentLines);
-
-    expect(result.requestName).toBe('getItem');
-  });
-
-  test('should extract propmt variables', () => {
-    const input = `
-# @prompt otp Enter code
-# @prompt username
-POST https://api.com/verify
-`.trim();
-    const lines = scanner.scan(input);
-    const segmentLines = segmenter.segment(lines)[0]!.lines;
-    const result = variableScanner.scan(segmentLines);
-
-    expect(result.prompts).toHaveLength(2);
-    expect(result.prompts[0]).toMatchObject({
-      name: 'otp',
-      description: 'Enter code',
+      expect(result.fileVariables).toHaveLength(0);
     });
-    expect(result.prompts[1]).toMatchObject({
-      name: 'username',
-      description: null,
-    });
-  });
 
-  test('should extract file variables', () => {
-    const input = `
-@baseUrl = https://api.com
-@timeout = 5000
-GET {{baseUrl}}/users
-`.trim();
-    const lines = scanner.scan(input);
-    const segmentLines = segmenter.segment(lines)[0]!.lines;
-    const result = variableScanner.scan(segmentLines);
+    test('should extract variables from segments', () => {
+      const text = `@baseUrl = https://api.example.com
+@contentType = application/json
 
-    expect(result.fileVariables).toHaveLength(2);
-    expect(result.fileVariables[0]).toMatchObject({
-      key: 'baseUrl',
-      value: 'https://api.com',
+###
+GET /users
+Content-Type: application/json`;
+      const lines = scanner.scan(text);
+      const segments = segmenter.segment(lines);
+      const result = variableScanner.scan(segments);
+
+      expect(result.fileVariables).toHaveLength(2);
+      expect(result.fileVariables[0].key).toBe('baseUrl');
+      expect(result.fileVariables[0].value).toBe('https://api.example.com');
+      expect(result.fileVariables[1].key).toBe('contentType');
+      expect(result.fileVariables[1].value).toBe('application/json');
     });
-    expect(result.fileVariables[1]).toMatchObject({
-      key: 'timeout',
-      value: '5000',
+
+    test('should extract variables with extra whitespace', () => {
+      const text = `@baseUrl  =  https://api.example.com  `;
+      const lines = scanner.scan(text);
+      const segments = segmenter.segment(lines);
+      const result = variableScanner.scan(segments);
+
+      expect(result.fileVariables).toHaveLength(1);
+      expect(result.fileVariables[0].key).toBe('baseUrl');
+      expect(result.fileVariables[0].value).toBe('https://api.example.com');
+    });
+
+    test('should extract empty value variables', () => {
+      const text = `@emptyVar =`;
+      const lines = scanner.scan(text);
+      const segments = segmenter.segment(lines);
+      const result = variableScanner.scan(segments);
+
+      expect(result.fileVariables).toHaveLength(1);
+      expect(result.fileVariables[0].key).toBe('emptyVar');
+      expect(result.fileVariables[0].value).toBe('');
     });
   });
 
-  test('should extract request settings', () => {
-    const input = `
-# @no-redirect
-# @note This is important
-GET https://api.com/redirect
-`.trim();
-    const lines = scanner.scan(input);
-    const segmentLines = segmenter.segment(lines)[0]!.lines;
-    const result = variableScanner.scan(segmentLines);
+  describe('comments', () => {
+    test('should extract comments from segments', () => {
+      const text = `# This is a comment
+@baseUrl = https://api.example.com
 
-    expect(result.settings).toHaveLength(2);
-    // @no-redirect
-    const noRedirect = result.settings.find((s) => s.name === 'no-redirect');
-    expect(noRedirect).toBeDefined();
+###
+# Another comment
+GET /users`;
+      const lines = scanner.scan(text);
+      const segments = segmenter.segment(lines);
+      const result = variableScanner.scan(segments);
 
-    // @note This is important
-    const note = result.settings.find((s) => s.name === 'note');
-    expect(note).toBeDefined();
-    expect(note!.value).toBe('This is important');
+      expect(result.fileComments).toHaveLength(2);
+      expect(result.fileComments[0].text).toBe('This is a comment');
+      expect(result.fileComments[1].text).toBe('Another comment');
+    });
+
+    test('should ignore empty comment lines', () => {
+      const text = `@baseUrl = https://api.example.com
+#
+# Valid comment
+GET /users`;
+      const lines = scanner.scan(text);
+      const segments = segmenter.segment(lines);
+      const result = variableScanner.scan(segments);
+
+      expect(result.fileComments).toHaveLength(1);
+      expect(result.fileComments[0].text).toBe('Valid comment');
+    });
+
+    test('should handle comments with extra whitespace', () => {
+      const text = `#   Comment with spaces   `;
+      const lines = scanner.scan(text);
+      const segments = segmenter.segment(lines);
+      const result = variableScanner.scan(segments);
+
+      expect(result.fileComments).toHaveLength(1);
+      expect(result.fileComments[0].text).toBe('Comment with spaces');
+    });
   });
 
-  test('should ignore malformed file variables (spaces in key)', () => {
-    const input = `
-@bad key = value
-GET /foo
-`.trim();
-    const lines = scanner.scan(input);
-    const segmentLines = segmenter.segment(lines)[0]!.lines;
-    const result = variableScanner.scan(segmentLines);
+  describe('segment tracking', () => {
+    test('should capture correct segmentId for each variable', () => {
+      const text = `@baseUrl = https://api.example.com
 
-    expect(result.fileVariables).toHaveLength(0);
+###
+@token = abc123
+
+###
+@localUrl = http://localhost:3000`;
+      const lines = scanner.scan(text);
+      const segments = segmenter.segment(lines);
+      const result = variableScanner.scan(segments);
+
+      expect(result.fileVariables).toHaveLength(3);
+      expect(result.fileVariables[0].segmentId).toBe(0);
+      expect(result.fileVariables[1].segmentId).toBe(1);
+      expect(result.fileVariables[2].segmentId).toBe(2);
+    });
+
+    test('should capture correct line numbers', () => {
+      const text = `@baseUrl = https://api.example.com
+@contentType = application/json
+
+###
+# Comment on line 5
+GET /users`;
+      const lines = scanner.scan(text);
+      const segments = segmenter.segment(lines);
+      const result = variableScanner.scan(segments);
+
+      expect(result.fileVariables[0].lineNumber).toBe(1);
+      expect(result.fileVariables[1].lineNumber).toBe(2);
+      expect(result.fileComments[0].lineNumber).toBe(5);
+    });
+
+    test('should handle multiple segments correctly', () => {
+      const text = `@global = value1
+
+###
+@local1 = value2
+
+###
+@local2 = value3
+@local3 = value4`;
+      const lines = scanner.scan(text);
+      const segments = segmenter.segment(lines);
+      const result = variableScanner.scan(segments);
+
+      expect(result.fileVariables).toHaveLength(4);
+      expect(segments).toHaveLength(3);
+    });
   });
 });
 
 describe('VariableRegistry', () => {
-  test('should store and retrieve variables', () => {
+  test('should store and retrieve global variables', () => {
     const registry = new VariableRegistry();
-    registry.set('baseUrl', 'https://example.com');
+    registry.set('baseUrl', 'https://api.example.com');
 
-    expect(registry.get('baseUrl')).toBe('https://example.com');
-    expect(registry.get('unknown')).toBeUndefined();
+    expect(registry.get('baseUrl')).toBe('https://api.example.com');
+    expect(registry.get('nonexistent')).toBeUndefined();
   });
 
-  test('should return all variables', () => {
+  test('should store and retrieve segment-specific variables', () => {
     const registry = new VariableRegistry();
-    registry.set('a', '1');
-    registry.set('b', '2');
+    registry.setForSegment(0, 'token', 'abc123');
+    registry.setForSegment(1, 'token', 'xyz789');
 
-    const all = registry.getAll();
-    expect(all).toEqual({ a: '1', b: '2' });
+    expect(registry.getAllBySegmentId(0)['token']).toBe('abc123');
+    expect(registry.getAllBySegmentId(1)['token']).toBe('xyz789');
   });
 
-  test('should overwrite existing variables', () => {
+  test('should get all variables for a segment', () => {
     const registry = new VariableRegistry();
-    registry.set('a', '1');
-    registry.set('a', '2');
+    registry.setForSegment(0, 'var1', 'value1');
+    registry.setForSegment(0, 'var2', 'value2');
+    registry.setForSegment(0, 'var3', 'value3');
 
-    expect(registry.get('a')).toBe('2');
+    const segmentVars = registry.getAllBySegmentId(0);
+    expect(Object.keys(segmentVars)).toHaveLength(3);
+    expect(segmentVars['var1']).toBe('value1');
+    expect(segmentVars['var2']).toBe('value2');
+    expect(segmentVars['var3']).toBe('value3');
+  });
+
+  test('should return empty object for non-existent segment', () => {
+    const registry = new VariableRegistry();
+    expect(registry.getAllBySegmentId(999)).toEqual({});
+  });
+
+  test('should fallback to global when segment variable not found', () => {
+    const registry = new VariableRegistry();
+    registry.set('globalVar', 'globalValue');
+    registry.setForSegment(0, 'segmentVar', 'segmentValue');
+
+    expect(registry.getWithSegment(0, 'globalVar')).toBe('globalValue');
+    expect(registry.getWithSegment(0, 'segmentVar')).toBe('segmentValue');
+    expect(registry.getWithSegment(0, 'nonexistent')).toBeUndefined();
+  });
+
+  test('should get all global variables', () => {
+    const registry = new VariableRegistry();
+    registry.set('var1', 'value1');
+    registry.set('var2', 'value2');
+
+    const allVars = registry.getAll();
+    expect(Object.keys(allVars)).toHaveLength(2);
+    expect(allVars['var1']).toBe('value1');
+    expect(allVars['var2']).toBe('value2');
+  });
+
+  describe('overwrite behavior', () => {
+    test('should overwrite existing variables', () => {
+      const registry = new VariableRegistry();
+      registry.set('baseUrl', 'https://api.example.com');
+      registry.set('baseUrl', 'https://new.example.com');
+
+      expect(registry.get('baseUrl')).toBe('https://new.example.com');
+    });
+
+    test('should overwrite segment-specific variables', () => {
+      const registry = new VariableRegistry();
+      registry.setForSegment(0, 'token', 'old-token');
+      registry.setForSegment(0, 'token', 'new-token');
+
+      expect(registry.getAllBySegmentId(0)['token']).toBe('new-token');
+    });
+
+    test('should allow different values in different segments', () => {
+      const registry = new VariableRegistry();
+      registry.setForSegment(0, 'var', 'value1');
+      registry.setForSegment(1, 'var', 'value2');
+
+      expect(registry.getAllBySegmentId(0)['var']).toBe('value1');
+      expect(registry.getAllBySegmentId(1)['var']).toBe('value2');
+    });
+
+    test('segment variable should shadow global for getWithSegment', () => {
+      const registry = new VariableRegistry();
+      registry.set('shared', 'global-value');
+      registry.setForSegment(0, 'shared', 'segment-value');
+
+      expect(registry.getWithSegment(0, 'shared')).toBe('segment-value');
+      expect(registry.getWithSegment(1, 'shared')).toBe('global-value');
+    });
   });
 });

@@ -1,0 +1,4 @@
+@api = https://example.com
+@token = abc
+
+GET {{api}}/ping

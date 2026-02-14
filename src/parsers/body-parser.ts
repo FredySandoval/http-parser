@@ -1,205 +1,393 @@
-import type { LineContext } from '../scanner/line-scanner';
+import type { LineContext, Header } from '../types/types';
+import type {
+  HttpBodyResult,
+  HttpBody,
+  HttpBodyContent,
+  JsonContent,
+  TextContent,
+  FormContent,
+  MultipartContent,
+  FormPart,
+} from '../types/body-parser-types';
 
 /**
- * FileReference represents a file inclusion in the body.
- */
-export interface FileReference {
-  path: string;
-  encoding?: string;
-  processVariables: boolean;
-}
-
-/**
- * GraphQLBody represents the query and optional variables of a GraphQL request.
- */
-export interface GraphQLBody {
-  query: string;
-  variables?: string;
-}
-
-/**
- * FormParam represents a key-value pair in a form-urlencoded body.
- */
-export interface FormParam {
-  key: string;
-  value: string;
-}
-
-/**
- * BodyObject represents the structured content of a request or response body.
- */
-export interface BodyObject {
-  type: 'raw' | 'file-ref' | 'form-urlencoded' | 'graphql';
-  raw?: string;
-  fileRef?: FileReference;
-  graphql?: GraphQLBody;
-  formParams?: FormParam[];
-}
-
-/**
- * Input for the BodyParser.
- */
-export interface BodyParserInput {
-  lines: LineContext[];
-  contentType?: string;
-  isGraphQL: boolean;
-}
-
-/**
- * BodyParser handles parsing of request and response bodies.
- * Supports:
- * - GraphQL (query and variables)
- * - x-www-form-urlencoded
- * - File references (< path, <@ path, <@encoding path)
- * - Raw inline body (JSON, XML, etc.)
+ * BodyParser handles parsing of HTTP request/response bodies.
+ *
+ * Responsibilities:
+ * - Extract body lines following the headers section (after first empty line)
+ * - Parse body content based on Content-Type header
+ * - Support JSON, form data, multipart, and text formats
+ * - Return structured body result with parsing status
  */
 export class BodyParser {
   /**
-   * Parses the body from an array of lines based on context.
+   * Parses HTTP body from an array of lines.
    *
-   * @param input Input containing lines and metadata (contentType, isGraphQL)
-   * @returns Structured BodyObject
+   * @param lines Array of LineContext objects representing the body content
+   * @param headers Array of parsed headers to determine content type
+   * @returns HttpBodyResult containing parsed content or error information
+   *
+   * @example
+   * Input: lines = [{ text: '{"name": "John"}' }], headers = [{ name: 'Content-Type', value: 'application/json' }]
+   * Output: { status: 'parsed', content: { protocol: 'http', body: { kind: 'json', data: { name: 'John' } } }, raw: '{"name": "John"}', contentType: 'application/json', size: 16 }
    */
-  parse(input: BodyParserInput): BodyObject {
-    const { lines, contentType, isGraphQL } = input;
-
+  parse(lines: LineContext[], headers: Header[]): HttpBodyResult {
     if (lines.length === 0) {
-      return { type: 'raw', raw: '' };
+      return this.createSuccessResult(null, '', null);
     }
 
-    if (isGraphQL) {
-      return this.parseGraphQL(lines);
+    const rawBody = lines.map((line) => line.text).join('\n');
+    const contentType = this.extractContentType(headers);
+    const size = this.calculateSize(rawBody);
+
+    if (rawBody.trim() === '') {
+      // Return appropriate empty content based on content type
+      const normalizedType = (contentType || '').toLowerCase().trim();
+      if (normalizedType.includes('application/x-www-form-urlencoded')) {
+        return this.createSuccessResult(
+          { kind: 'form', fields: {} },
+          rawBody,
+          contentType,
+          size
+        );
+      }
+      return this.createSuccessResult(null, rawBody, contentType, size);
     }
 
-    if (contentType === 'application/x-www-form-urlencoded') {
-      return this.parseFormUrlEncoded(lines);
+    try {
+      const content = this.parseByContentType(rawBody, contentType);
+      return this.createSuccessResult(content, rawBody, contentType, size);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown parse error';
+      return this.createErrorResult(errorMessage, rawBody, contentType, size);
+    }
+  }
+
+  /**
+   * Extracts the Content-Type value from headers.
+   *
+   * @param headers Array of Header objects
+   * @returns The content type string or null if not found
+   *
+   * @example
+   * Input: [{ name: 'Content-Type', value: 'application/json' }]
+   * Output: 'application/json'
+   *
+   * Input: [{ name: 'content-type', value: 'text/html' }]
+   * Output: 'text/html'
+   */
+  private extractContentType(headers: Header[]): string | null {
+    const contentTypeHeader = headers.find(
+      (h) => h.name.toLowerCase() === 'content-type'
+    );
+    return contentTypeHeader ? contentTypeHeader.value : null;
+  }
+
+  /**
+   * Parses body content based on detected content type.
+   *
+   * @param rawBody The raw body text
+   * @param contentType The detected content type
+   * @returns Parsed HttpBodyContent
+   *
+   * @example
+   * Input: rawBody = '{"key": "value"}', contentType = 'application/json'
+   * Output: { kind: 'json', data: { key: 'value' } }
+   */
+  private parseByContentType(
+    rawBody: string,
+    contentType: string | null
+  ): HttpBodyContent {
+    const normalizedType = (contentType || '').toLowerCase().trim();
+
+    if (
+      normalizedType.includes('application/json') ||
+      normalizedType.includes('text/json')
+    ) {
+      return this.parseJson(rawBody);
     }
 
-    // Check the first line for a file reference
-    // Note: Spec says "Body lines starting with < indicate a file reference."
-    // Usually if the first line starts with <, the whole body is a file reference
-    // UNLESS it's multipart, but the pseudo code implies a choice here.
-    const firstLineTrimmed = lines[0]!.text.trim();
-    if (firstLineTrimmed.startsWith('<')) {
-      return this.parseFileReference(lines[0]!.text);
+    if (normalizedType.includes('application/x-www-form-urlencoded')) {
+      return this.parseFormData(rawBody);
     }
 
-    // Default to raw body
+    if (normalizedType.includes('multipart/form-data')) {
+      return this.parseMultipart(rawBody, contentType);
+    }
+
+    return this.parseText(rawBody);
+  }
+
+  /**
+   * Parses JSON body content.
+   *
+   * @param rawBody The raw body text
+   * @returns JsonContent with parsed data
+   *
+   * @example
+   * Input: '{"name": "John", "age": 30}'
+   * Output: { kind: 'json', data: { name: 'John', age: 30 } }
+   */
+  private parseJson(rawBody: string): JsonContent {
+    const trimmed = rawBody.trim();
+    if (trimmed === '') {
+      return { kind: 'json', data: null };
+    }
+
+    try {
+      const data = JSON.parse(trimmed);
+      return { kind: 'json', data };
+    } catch (error) {
+      throw new Error(
+        `Invalid JSON: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+  }
+
+  /**
+   * Parses URL-encoded form data.
+   *
+   * @param rawBody The raw body text
+   * @returns FormContent with parsed fields
+   *
+   * @example
+   * Input: 'name=John+Doe&age=30&hobbies=reading&hobbies=gaming'
+   * Output: { kind: 'form', fields: { name: 'John Doe', age: '30', hobbies: ['reading', 'gaming'] } }
+   */
+  private parseFormData(rawBody: string): FormContent {
+    const fields: Record<string, string | string[]> = {};
+
+    if (rawBody.trim() === '') {
+      return { kind: 'form', fields };
+    }
+
+    const pairs = rawBody.split('&');
+
+    for (const pair of pairs) {
+      const [key, value] = pair.split('=');
+      if (key) {
+        const decodedKey = decodeURIComponent(key.trim());
+        const decodedValue =
+          value !== undefined
+            ? decodeURIComponent(value.replace(/\+/g, ' ')).trim()
+            : '';
+
+        if (fields[decodedKey] !== undefined) {
+          // Handle duplicate keys as arrays
+          if (Array.isArray(fields[decodedKey])) {
+            (fields[decodedKey] as string[]).push(decodedValue);
+          } else {
+            fields[decodedKey] = [fields[decodedKey] as string, decodedValue];
+          }
+        } else {
+          fields[decodedKey] = decodedValue;
+        }
+      }
+    }
+
+    return { kind: 'form', fields };
+  }
+
+  /**
+   * Parses multipart/form-data content.
+   *
+   * @param rawBody The raw body text
+   * @param contentType The content type header value (contains boundary)
+   * @returns MultipartContent with parsed parts
+   *
+   * @example
+   * Input: rawBody with boundary '----WebKitFormBoundary', contentType = 'multipart/form-data; boundary=----WebKitFormBoundary'
+   * Output: { kind: 'multipart', boundary: '----WebKitFormBoundary', parts: [...] }
+   */
+  private parseMultipart(
+    rawBody: string,
+    contentType: string | null
+  ): MultipartContent {
+    if (!contentType) {
+      throw new Error(
+        'Missing Content-Type header with boundary for multipart'
+      );
+    }
+
+    const boundaryMatch = contentType.match(/boundary=([^;]+)/i);
+    if (!boundaryMatch || !boundaryMatch[1]) {
+      throw new Error('Missing boundary in Content-Type header');
+    }
+
+    const boundary = boundaryMatch[1].trim().replace(/^["']|["']$/g, '');
+    const parts: FormPart[] = [];
+
+    // Split by boundary
+    const delimiter = `--${boundary}`;
+    const sections = rawBody.split(delimiter);
+
+    for (const section of sections) {
+      const trimmed = section.trim();
+      if (trimmed === '' || trimmed === '--') {
+        continue;
+      }
+
+      const part = this.parseMultipartPart(trimmed);
+      if (part) {
+        parts.push(part);
+      }
+    }
+
+    return { kind: 'multipart', boundary, parts };
+  }
+
+  /**
+   * Parses a single multipart part section.
+   *
+   * @param section The raw part section
+   * @returns FormPart object or null if invalid
+   */
+  private parseMultipartPart(section: string): FormPart | null {
+    const lines = section.split('\n');
+    const headers: Record<string, string> = {};
+    let contentDisposition: string | null = null;
+    let headerEndIndex = 0;
+
+    // Parse headers
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (!line || line.trim() === '') {
+        headerEndIndex = i + 1;
+        break;
+      }
+
+      const colonIndex = line.indexOf(':');
+      if (colonIndex !== -1) {
+        const name = line.slice(0, colonIndex).trim();
+        const value = line.slice(colonIndex + 1).trim();
+        headers[name.toLowerCase()] = value;
+
+        if (name.toLowerCase() === 'content-disposition') {
+          contentDisposition = value;
+        }
+      }
+    }
+
+    if (!contentDisposition) {
+      return null;
+    }
+
+    // Extract name and filename from Content-Disposition
+    const nameMatch = contentDisposition.match(/name="([^"]+)"/);
+    const filenameMatch = contentDisposition.match(/filename="([^"]+)"/);
+
+    if (!nameMatch || !nameMatch[1]) {
+      return null;
+    }
+
+    const name = nameMatch[1];
+    const filename =
+      filenameMatch && filenameMatch[1] ? filenameMatch[1] : undefined;
+    const partContentType = headers['content-type'];
+
+    // Extract value (everything after headers)
+    const valueLines = lines.slice(headerEndIndex);
+    const value = valueLines.join('\n').trim();
+
     return {
-      type: 'raw',
-      raw: lines.map((l) => l.text).join('\n'),
+      name,
+      value,
+      filename,
+      contentType: partContentType,
+      headers: Object.keys(headers).length > 0 ? headers : undefined,
     };
   }
 
   /**
-   * Parses GraphQL body, splitting query and variables at the first blank line.
+   * Parses body as plain text.
+   *
+   * @param rawBody The raw body text
+   * @returns TextContent
    */
-  private parseGraphQL(lines: LineContext[]): BodyObject {
-    let blankLineIndex = -1;
-    for (let i = 0; i < lines.length; i++) {
-      if (lines[i]!.text.trim() === '') {
-        blankLineIndex = i;
-        break;
-      }
-    }
+  private parseText(rawBody: string): TextContent {
+    return { kind: 'text', text: rawBody };
+  }
 
-    if (blankLineIndex !== -1) {
-      const queryLines = lines.slice(0, blankLineIndex);
-      const variableLines = lines.slice(blankLineIndex + 1);
+  /**
+   * Calculates body size in bytes.
+   *
+   * @param rawBody The raw body text
+   * @returns Size in bytes
+   */
+  private calculateSize(rawBody: string): number {
+    return new TextEncoder().encode(rawBody).length;
+  }
 
+  /**
+   * Creates a successful parse result.
+   *
+   * @param content The parsed body content
+   * @param raw The raw body text
+   * @param contentType The content type
+   * @param size Size in bytes (optional, calculated if not provided)
+   * @returns HttpBodyResult with status 'parsed'
+   */
+  private createSuccessResult(
+    content: HttpBodyContent | null,
+    raw: string,
+    contentType: string | null,
+    size?: number
+  ): HttpBodyResult {
+    const bodySize = size ?? this.calculateSize(raw);
+
+    if (content === null) {
       return {
-        type: 'graphql',
-        graphql: {
-          query: queryLines.map((l) => l.text).join('\n'),
-          variables:
-            variableLines
-              .map((l) => l.text)
-              .join('\n')
-              .trim() || undefined,
-        },
+        status: 'parsed',
+        content: { protocol: 'http', body: { kind: 'text', text: '' } },
+        raw,
+        contentType,
+        size: bodySize,
       };
     }
 
+    const httpBody: HttpBody = {
+      protocol: 'http',
+      body: content,
+    };
+
     return {
-      type: 'graphql',
-      graphql: {
-        query: lines.map((l) => l.text).join('\n'),
-      },
+      status: 'parsed',
+      content: httpBody,
+      raw,
+      contentType,
+      size: bodySize,
     };
   }
 
   /**
-   * Parses x-www-form-urlencoded body.
+   * Creates an error parse result.
+   *
+   * @param message Error message
+   * @param raw The raw body text
+   * @param contentType The content type
+   * @param size Size in bytes (optional, calculated if not provided)
+   * @param lineNumber Optional line number where error occurred
+   * @returns HttpBodyResult with status 'error'
    */
-  private parseFormUrlEncoded(lines: LineContext[]): BodyObject {
-    const formParams: FormParam[] = [];
-
-    for (const line of lines) {
-      let text = line.text.trim();
-      if (text === '') continue;
-
-      // Handle continuations (lines starting with &)
-      if (text.startsWith('&')) {
-        text = text.slice(1).trim();
-      }
-
-      if (!text) continue;
-
-      const eqIndex = text.indexOf('=');
-      if (eqIndex !== -1) {
-        formParams.push({
-          key: text.slice(0, eqIndex).trim(),
-          value: text.slice(eqIndex + 1).trim(),
-        });
-      } else {
-        formParams.push({ key: text, value: '' });
-      }
-    }
+  private createErrorResult(
+    message: string,
+    raw: string,
+    contentType: string | null,
+    size?: number,
+    lineNumber?: number
+  ): HttpBodyResult {
+    const bodySize = size ?? this.calculateSize(raw);
 
     return {
-      type: 'form-urlencoded',
-      formParams,
-    };
-  }
-
-  /**
-   * Parses file reference syntax: < path, <@ path, <@encoding path
-   */
-  private parseFileReference(lineText: string): BodyObject {
-    const trimmed = lineText.trim();
-    let path = '';
-    let encoding: string | undefined;
-    let processVariables = false;
-
-    if (trimmed.startsWith('<@')) {
-      processVariables = true;
-      // <@encoding path or <@ path
-      const afterAt = trimmed.slice(2).trim();
-      const spaceIndex = afterAt.indexOf(' ');
-
-      if (spaceIndex !== -1) {
-        // Potential encoding
-        const potentialEncoding = afterAt.slice(0, spaceIndex).trim();
-        // Check if it's a known encoding or just part of the path?
-        // Spec says "<@encoding path".
-        encoding = potentialEncoding;
-        path = afterAt.slice(spaceIndex + 1).trim();
-      } else {
-        // Just path: <@ path
-        path = afterAt;
-      }
-    } else if (trimmed.startsWith('<')) {
-      // < path
-      path = trimmed.slice(1).trim();
-    }
-
-    return {
-      type: 'file-ref',
-      fileRef: {
-        path,
-        encoding,
-        processVariables,
+      status: 'error',
+      error: {
+        message,
+        ...(lineNumber !== undefined && { lineNumber }),
       },
+      raw,
+      contentType,
+      size: bodySize,
     };
   }
 }

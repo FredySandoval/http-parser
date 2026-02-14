@@ -5,15 +5,8 @@ A standalone parser for REST client HTTP files, that transforms plain text HTTP 
 ## Features
 
 - **Parse HTTP Requests**: Supports standard HTTP request syntax with all common features
-- **Multiple Input Sources**: Parse from strings, streams, or async iterables
 - **Advanced Features**:
-  - GraphQL request parsing
-  - cURL command parsing
-  - Variable support (file, prompt, request, system variables)
-  - File reference bodies
-  - Form data and URL-encoded bodies
-  - Multi-part requests
-  - Request settings and annotations
+  - Variable support
 
 ## Installation
 
@@ -39,154 +32,43 @@ Content-Type: application/json
 console.dir(result, { depth: null });
 ```
 
-## Output Structure
-
-The parser produces a structured AST with the following format:
-
-```ts
-interface ParseResult {
-  text: string;
-  metadata: ParseMetadata;
-  lineContexts: LineContext[];
-  segments: Segment[];
-  ast: HttpRequestAST;
-}
-
-interface ParseMetadata {
-  length: number;
-  lines: number;
-  encoding: string;
-  source: SourceMetadata;
-}
-
-interface SourceMetadata {
-  type: 'string' | 'stream';
-  name?: string;
-}
-
-interface LineContext {
-  lineNumber: number;
-  startOffset: number;
-  endOffset: number;
-  text: string;
-}
-
-interface HttpRequestAST {
-  requests: Request[];
-}
-
-interface Request {
-  name: string | null;
-  method: string;
-  url: string;
-  httpVersion: string | null;
-  queryParams: QueryParam[];
-  headers: Header[];
-  body: BodyObject | null;
-  variables: {
-    fileVariables: FileVariable[];
-  };
-  comments: string[];
-  rawTextRange: { startLine, endLine };
-  expectedResponse: ExpectedResponse | null;
-}
-
-interface ExpectedResponse {
-  statusCode: number;
-  statusText: string | null;
-  httpVersion: string | null;
-  headers: Header[];
-  body: string | object | null;
-  variables: {
-    fileVariables: FileVariable[];
-  };
-  rawTextRange: {
-    startLine: number;
-    endLine: number;
-  };
-}
-
-interface FileVariable {
-  key: string;
-  value: string;
-  lineNumber: number;
-}
-
-interface BodyObject {
-  type: 'raw' | 'file-ref' | 'form-urlencoded' | 'graphql';
-  raw?: string;
-  fileRef?: FileReference;
-  graphql?: GraphQLBody;
-  formParams?: FormParam[];
-}
-
-interface FileReference {
-  path: string;
-  encoding?: string;
-  processVariables: boolean;
-}
-
-interface GraphQLBody {
-  query: string;
-  variables?: string;
-}
-
-interface FormParam {
-  key: string;
-  value: string;
-}
-```
-
 ## Supported Syntax
-
-### HTTP Request Examples
-
-#### Basic Request
-
-```http
-GET https://api.example.com/users HTTP/1.1
-Authorization: Bearer token123
-Content-Type: application/json
-
-{
-  "name": "John Doe"
-}
-```
 
 ### File Variables
 
+Define variables at block and file level:
+
 ```http
 @baseUrl = https://api.example.com
-@token = abc123
+@contentType = application/json
 
-GET {{baseUrl}}/users
-Authorization: Bearer {{token}}
+###
+GET {{baseUrl}}/users HTTP/1.1
+Content-Type: {{contentType}}
+
+###
+# Use the created user's ID in next request
+GET https://api.example.com/users/123 HTTP/1.1
+Accept: application/json
+
+###
+@baseUrl = http://localhost:3000
+POST {{baseUrl}}/users HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john@example.com"
+}
+
+###
+HTTP/1.1 201 Created
+Content-Type: application/json
+Location: {{baseUrl}}/users/123
 ```
 
-## Development
+### Variable Scopes In AST
 
-### Building
-
-```bash
-bun run build
-```
-
-### Testing
-
-```bash
-bun test
-```
-
-### Linting
-
-```bash
-npm run format
-```
-
-## Contributing
-
-Contributions are welcome! Please read the [contributing guidelines](CONTRIBUTING.md) for more information.
-
-## License
-
-MIT License - see [LICENSE](LICENSE) file for details.
+- `ast.globalVariables.fileVariables`: all variable declarations found across all segments.
+- `ast.fileScopedVariables.fileVariables`: only declarations that appear before the first `###` delimiter (true file scope).
+- `request.blockVariables.fileVariables`: declarations inside that request's segment only.

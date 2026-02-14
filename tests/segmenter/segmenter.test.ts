@@ -1,6 +1,7 @@
 import { test, expect, describe } from 'bun:test';
-import { Segmenter, type Segment } from '../../src/segmenter/segmenter';
-import { LineScanner, type LineContext } from '../../src/scanner/line-scanner';
+import { Segmenter } from '../../src/segmenter/segmenter';
+import { LineScanner } from '../../src/scanner/line-scanner';
+import type { LineContext } from '../../src/types/types';
 
 /**
  * Test suite for Segmenter class.

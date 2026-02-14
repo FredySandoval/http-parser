@@ -3,10 +3,9 @@
   "metadata": {
     "length": 190,
     "lines": 8,
-    "encoding": "UTF-8",
+    "encoding": "utf-8",
     "source": {
-      "type": "string",
-      "name": "raw"
+      "type": "string"
     }
   },
   "lineContexts": [
@@ -117,15 +116,6 @@
     }
   ],
   "ast": {
-    "metadata": {
-      "length": 190,
-      "lines": 8,
-      "encoding": "UTF-8",
-      "source": {
-        "type": "string",
-        "name": "raw"
-      }
-    },
     "requests": [
       {
         "name": null,
@@ -144,18 +134,21 @@
           }
         ],
         "body": {
-          "type": "file-ref",
-          "fileRef": {
-            "path": "request>",
-            "processVariables": false
-          }
+          "status": "parsed",
+          "content": {
+            "protocol": "http",
+            "body": {
+              "kind": "text",
+              "text": "<request>\n    <name>sample</name>\n    <time>Wed, 21 Oct 2015 18:27:50 GMT</time>\n</request>"
+            }
+          },
+          "raw": "<request>\n    <name>sample</name>\n    <time>Wed, 21 Oct 2015 18:27:50 GMT</time>\n</request>",
+          "contentType": "application/xml",
+          "size": 91
         },
-        "variables": {
-          "fileVariables": [],
-          "prompt": [],
-          "request": []
+        "blockVariables": {
+          "fileVariables": []
         },
-        "settings": [],
         "comments": [],
         "rawTextRange": {
           "startLine": 1,
@@ -164,6 +157,11 @@
         "expectedResponse": null
       }
     ],
-    "fileVariables": []
+    "fileScopedVariables": {
+      "fileVariables": []
+    },
+    "globalVariables": {
+      "fileVariables": []
+    }
   }
 }

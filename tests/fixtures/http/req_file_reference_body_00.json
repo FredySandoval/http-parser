@@ -3,10 +3,9 @@
   "metadata": {
     "length": 82,
     "lines": 4,
-    "encoding": "UTF-8",
+    "encoding": "utf-8",
     "source": {
-      "type": "string",
-      "name": "raw"
+      "type": "string"
     }
   },
   "lineContexts": [
@@ -69,15 +68,6 @@
     }
   ],
   "ast": {
-    "metadata": {
-      "length": 82,
-      "lines": 4,
-      "encoding": "UTF-8",
-      "source": {
-        "type": "string",
-        "name": "raw"
-      }
-    },
     "requests": [
       {
         "name": null,
@@ -92,18 +82,17 @@
           }
         ],
         "body": {
-          "type": "file-ref",
-          "fileRef": {
-            "path": "./data.json",
-            "processVariables": true
-          }
+          "status": "error",
+          "error": {
+            "message": "Invalid JSON: JSON Parse error: Unrecognized token '<'"
+          },
+          "raw": "<@ ./data.json",
+          "contentType": "application/json",
+          "size": 14
         },
-        "variables": {
-          "fileVariables": [],
-          "prompt": [],
-          "request": []
+        "blockVariables": {
+          "fileVariables": []
         },
-        "settings": [],
         "comments": [],
         "rawTextRange": {
           "startLine": 1,
@@ -112,6 +101,11 @@
         "expectedResponse": null
       }
     ],
-    "fileVariables": []
+    "fileScopedVariables": {
+      "fileVariables": []
+    },
+    "globalVariables": {
+      "fileVariables": []
+    }
   }
 }

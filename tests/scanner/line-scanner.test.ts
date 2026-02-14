@@ -1,5 +1,5 @@
 import { test, expect, describe } from 'bun:test';
-import { LineScanner, type LineContext } from '../../src/scanner/line-scanner';
+import { LineScanner } from '../../src/scanner/line-scanner';
 
 /**
  * Test suite for LineScanner class.
