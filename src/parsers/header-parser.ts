@@ -1,24 +1,7 @@
-import type { LineContext } from '../scanner/line-scanner';
-
-/**
- * Header represents a single HTTP header name-value pair.
- */
-export interface Header {
-  name: string;
-  value: string;
-}
-
-/**
- * Result of the header parsing.
- */
-export interface HeaderParserResult {
-  headers: Header[];
-  consumedLinesCount: number;
-}
-
+import type { LineContext, Header, HeaderParserResult } from '../types/types';
 /**
  * HeaderParser handles parsing of HTTP headers.
- * According to specification:
+ * Specification:
  * - Header lines begin immediately after the request line (or query section).
  * - Parsing stops at the first empty line.
  * - Format: Header-Name: Header Value

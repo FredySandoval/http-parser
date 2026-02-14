@@ -3,10 +3,9 @@
   "metadata": {
     "length": 101,
     "lines": 3,
-    "encoding": "UTF-8",
+    "encoding": "utf-8",
     "source": {
-      "type": "string",
-      "name": "raw"
+      "type": "string"
     }
   },
   "lineContexts": [
@@ -57,15 +56,6 @@
     }
   ],
   "ast": {
-    "metadata": {
-      "length": 101,
-      "lines": 3,
-      "encoding": "UTF-8",
-      "source": {
-        "type": "string",
-        "name": "raw"
-      }
-    },
     "requests": [
       {
         "name": null,
@@ -84,12 +74,9 @@
           }
         ],
         "body": null,
-        "variables": {
-          "file": [],
-          "prompt": [],
-          "request": []
+        "blockVariables": {
+          "fileVariables": []
         },
-        "settings": [],
         "comments": [],
         "rawTextRange": {
           "startLine": 1,
@@ -98,6 +85,11 @@
         "expectedResponse": null
       }
     ],
-    "fileVariables": []
+    "fileScopedVariables": {
+      "fileVariables": []
+    },
+    "globalVariables": {
+      "fileVariables": []
+    }
   }
 }

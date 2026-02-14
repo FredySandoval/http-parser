@@ -3,10 +3,9 @@
   "metadata": {
     "length": 257,
     "lines": 15,
-    "encoding": "UTF-8",
+    "encoding": "utf-8",
     "source": {
-      "type": "string",
-      "name": "raw"
+      "type": "string"
     }
   },
   "lineContexts": [
@@ -202,18 +201,9 @@
     }
   ],
   "ast": {
-    "metadata": {
-      "length": 257,
-      "lines": 15,
-      "encoding": "UTF-8",
-      "source": {
-        "type": "string",
-        "name": "raw"
-      }
-    },
     "requests": [
       {
-        "name": "login",
+        "name": null,
         "method": "POST",
         "url": "https://api.example.com/login",
         "httpVersion": null,
@@ -225,16 +215,27 @@
           }
         ],
         "body": {
-          "type": "raw",
-          "raw": "{\n  \"username\": \"test\",\n  \"password\": \"test\"\n}\n"
+          "status": "parsed",
+          "content": {
+            "protocol": "http",
+            "body": {
+              "kind": "json",
+              "data": {
+                "username": "test",
+                "password": "test"
+              }
+            }
+          },
+          "raw": "{\n  \"username\": \"test\",\n  \"password\": \"test\"\n}\n",
+          "contentType": "application/json",
+          "size": 47
         },
-        "variables": {
-          "file": [],
-          "prompt": [],
-          "request": []
+        "blockVariables": {
+          "fileVariables": []
         },
-        "settings": [],
-        "comments": [],
+        "comments": [
+          "@name login"
+        ],
         "rawTextRange": {
           "startLine": 1,
           "endLine": 9
@@ -254,30 +255,16 @@
           }
         ],
         "body": null,
-        "variables": {
-          "file": [
+        "blockVariables": {
+          "fileVariables": [
             {
               "key": "authToken",
               "value": "{{login.response.headers.X-Auth-Token}}",
-              "lineNumber": 12
-            }
-          ],
-          "prompt": [],
-          "request": [
-            {
-              "kind": "request",
-              "name": "login.response.headers.X-Auth-Token",
-              "raw": "{{login.response.headers.X-Auth-Token}}",
-              "offset": 13,
-              "length": 39,
-              "requestName": "login",
-              "source": "response",
-              "part": "headers",
-              "path": "X-Auth-Token"
+              "lineNumber": 12,
+              "segmentId": null
             }
           ]
         },
-        "settings": [],
         "comments": [],
         "rawTextRange": {
           "startLine": 11,
@@ -286,12 +273,18 @@
         "expectedResponse": null
       }
     ],
-    "fileVariables": [
-      {
-        "key": "authToken",
-        "value": "{{login.response.headers.X-Auth-Token}}",
-        "lineNumber": 12
-      }
-    ]
+    "fileScopedVariables": {
+      "fileVariables": []
+    },
+    "globalVariables": {
+      "fileVariables": [
+        {
+          "key": "authToken",
+          "value": "{{login.response.headers.X-Auth-Token}}",
+          "lineNumber": 12,
+          "segmentId": 1
+        }
+      ]
+    }
   }
 }

@@ -3,10 +3,9 @@
   "metadata": {
     "length": 213,
     "lines": 10,
-    "encoding": "UTF-8",
+    "encoding": "utf-8",
     "source": {
-      "type": "string",
-      "name": "raw"
+      "type": "string"
     }
   },
   "lineContexts": [
@@ -141,15 +140,6 @@
     }
   ],
   "ast": {
-    "metadata": {
-      "length": 213,
-      "lines": 10,
-      "encoding": "UTF-8",
-      "source": {
-        "type": "string",
-        "name": "raw"
-      }
-    },
     "requests": [
       {
         "name": null,
@@ -164,27 +154,28 @@
           }
         ],
         "body": {
-          "type": "raw",
-          "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}"
-        },
-        "variables": {
-          "file": [],
-          "prompt": [
-            {
-              "name": "username",
-              "description": "Your username",
-              "lineNumber": 1
-            },
-            {
-              "name": "password",
-              "description": "Your password (will be masked)",
-              "lineNumber": 2
+          "status": "parsed",
+          "content": {
+            "protocol": "http",
+            "body": {
+              "kind": "json",
+              "data": {
+                "username": "{{username}}",
+                "password": "{{password}}"
+              }
             }
-          ],
-          "request": []
+          },
+          "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}",
+          "contentType": "application/json",
+          "size": 62
         },
-        "settings": [],
-        "comments": [],
+        "blockVariables": {
+          "fileVariables": []
+        },
+        "comments": [
+          "@prompt username Your username",
+          "@prompt password Your password (will be masked)"
+        ],
         "rawTextRange": {
           "startLine": 1,
           "endLine": 10
@@ -192,6 +183,11 @@
         "expectedResponse": null
       }
     ],
-    "fileVariables": []
+    "fileScopedVariables": {
+      "fileVariables": []
+    },
+    "globalVariables": {
+      "fileVariables": []
+    }
   }
 }

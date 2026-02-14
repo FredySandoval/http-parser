@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
 
 jobs:
   publish:
@@ -33,9 +34,9 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           cache: pnpm
 
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm run test
-      - run: pnpm run build
+      - run: bun install --frozen-lockfile
+      - run: bun run test
+      - run: bun run build
 
       - name: Verify version matches tag
         run: |

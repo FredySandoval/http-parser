@@ -1,113 +1,148 @@
 /**
- * REST Client Parser - Main Public API
+ * @fredy/http-parser - Public API
  *
- * Parses one or more HTTP requests from various input sources.
- * This is an NPM package for transforming plain text HTTP-like documents
- * into structured, machine-readable representations.
- *
- * @example
- * import { parseHttp } from './index'
- * const result = parseHttp("POST /foo HTTP/1.1\nContent-Type: application/json\n\n{}")
+ * Main entry point for the HTTP Parser library.
+ * Provides a simple, clean interface for parsing HTTP files.
  *
  * @example
- * import { HttpRequestParser } from './index'
- * const parser = new HttpRequestParser({ encoding: 'UTF-8' })
- * const result = parser.parseText("GET /api/users HTTP/1.1")
+ * ```typescript
+ * import { parseHttp, ParseResult } from '@fredy/http-parser';
+ *
+ * const result: ParseResult = parseHttp(`
+ *   GET https://api.example.com/users
+ *   Authorization: Bearer token123
+ * `);
+ *
+ * console.log(result.ast.requests[0].method); // "GET"
+ * ```
  */
 
-import {
-  HttpRequestParser,
-  type ParserOptions,
-  type ParseResult,
-} from './parser';
+import type {
+  ParseResult,
+  ParseMetadata,
+  ParserOptions,
+  LineContext,
+  Segment,
+  HttpRequestAST,
+  Request,
+  QueryParam,
+  Header,
+  ExpectedResponse,
+  FileVariable,
+  ScanResult,
+  FileComment,
+  SegmentType,
+  MessageType,
+  ClassifiedSegment,
+  ParsedHTTPRequestLine,
+  HeaderParserResult,
+  QueryParserResult,
+} from './types/types';
+
+import type {
+  HttpBodyResult,
+  HttpBodyContent,
+  JsonContent,
+  FormContent,
+  MultipartContent,
+  TextContent,
+  FormPart,
+} from './types/body-parser-types';
+
+import type { SegmentParseResult, ParseError } from './parsers/segment-parser';
+
+import { HttpRequestParser } from './parser';
+import { LineScanner } from './scanner/line-scanner';
+import { Segmenter } from './segmenter/segmenter';
+import { VariableScanner, VariableRegistry } from './scanner/variable-scanner';
+import { SegmentClassifier } from './segmenter/classifier';
+import { SegmentParser } from './parsers/segment-parser';
+import { HTTPRequestLineParser } from './parsers/request-line';
+import { ResponseLineParser } from './parsers/response-line';
+import { HeaderParser } from './parsers/header-parser';
+import { BodyParser } from './parsers/body-parser';
+import { QueryParser } from './parsers/query-parser';
+
+// --- Core Parser Function ---
 
 /**
- * Default parser options used by the parseHttp convenience function.
+ * Parses raw HTTP file text into a structured AST.
+ *
+ * This is the primary function for consuming the library.
+ * It handles the complete parsing pipeline and returns a structured result.
+ *
+ * @param text - Raw HTTP file content to parse
+ * @param options - Optional parser configuration
+ * @returns ParseResult containing the parsed AST and metadata
+ *
+ * @example
+ * Input: "GET https://api.example.com/users HTTP/1.1\nAccept: application/json"
+ * Output: ParseResult with parsed requests, headers, and metadata
  */
-const defaultOptions: ParserOptions = {
-  encoding: 'UTF-8',
-  strict: false,
+export function parseHttp(text: string, options?: ParserOptions): ParseResult {
+  const parser = new HttpRequestParser(options);
+  return parser.parseText(text);
+}
+
+// --- Type Exports ---
+
+// ParseResult and core types
+export type {
+  ParseResult,
+  ParseMetadata,
+  ParserOptions,
+  LineContext,
+  Segment,
+  HttpRequestAST,
 };
 
-/**
- * Parses HTTP requests from a string.
- * This is the main convenience function for quick parsing.
- *
- * @param input - The raw text content containing HTTP request(s)
- * @param options - Optional parser configuration
- * @returns ParseResult containing text, metadata, and parsed structures
- *
- * @example
- * const result = parseHttp("GET https://example.com HTTP/1.1");
- * console.log(result.segments); // Array of parsed segments
- */
-export function parseHttp(input: string, options?: ParserOptions): ParseResult {
-  const parser = new HttpRequestParser({ ...defaultOptions, ...options });
-  return parser.parseText(input);
-}
+// AST Types
+export type { Request, QueryParam, Header, ExpectedResponse, FileVariable };
 
-/**
- * Parses HTTP requests from a stream asynchronously.
- * Convenience function for stream-based parsing.
- *
- * @param stream - A ReadableStream or async iterable to parse
- * @param options - Optional parser configuration
- * @returns Promise resolving to ParseResult
- *
- * @example
- * const result = await parseHttpStream(readableStream);
- */
-export async function parseHttpStream(
-  stream: ReadableStream<Uint8Array> | AsyncIterable<Uint8Array>,
-  options?: ParserOptions
-): Promise<ParseResult> {
-  const parser = new HttpRequestParser({ ...defaultOptions, ...options });
-  return parser.parseStream(stream);
-}
+// Scanner Types
+export type { ScanResult, FileComment };
 
-// ============================================================================
-// Public Exports for NPM Package
-// ============================================================================
+// Segmenter Types
+export type { SegmentType, MessageType, ClassifiedSegment };
 
-// Core parser class
-export { HttpRequestParser } from './parser';
+// Parser Types
+export type { ParsedHTTPRequestLine, HeaderParserResult, QueryParserResult };
 
-// Types
+// Body Parser Types
 export type {
-  ParserOptions,
-  ParseResult,
-  ParsedInput,
-  ParseMetadata,
-  SourceMetadata,
-  ParserPlugin,
-} from './parser';
+  HttpBodyResult,
+  HttpBodyContent,
+  JsonContent,
+  FormContent,
+  MultipartContent,
+  TextContent,
+  FormPart,
+};
 
-// AST Types - Main output of the parser
-export type { HttpRequestAST, Request, ExpectedResponse } from './ast';
+// Segment Parser Types
+export type { SegmentParseResult, ParseError };
 
-// Parser Component Types
-export type { QueryParam } from './parsers/query-parser';
-export type { Header } from './parsers/header-parser';
-export type { BodyObject } from './parsers/body-parser';
+// --- Class Exports (for advanced usage) ---
 
-// Variable Types
-export type {
-  FileVariable,
-  PromptVariable,
-  RequestSetting,
-} from './scanner/variable-scanner';
-export type { VariableReference } from './scanner/system-variable-scanner';
+export { HttpRequestParser };
+export { LineScanner };
+export { Segmenter };
+export { VariableScanner, VariableRegistry };
+export { SegmentClassifier };
+export { SegmentParser };
+export { HTTPRequestLineParser };
+export { ResponseLineParser };
+export { HeaderParser };
+export { BodyParser };
+export { QueryParser };
 
-// Scanner exports
-export { LineScanner } from './scanner/line-scanner';
-export type { LineContext } from './scanner/line-scanner';
+// --- Constants ---
 
-// Segmenter exports
-export { Segmenter } from './segmenter/segmenter';
-export type { Segment } from './segmenter/segmenter';
-export { SegmentClassifier } from './segmenter/classifier';
-export type {
-  ClassifiedSegment,
-  SegmentType,
-  SegmentSubtype,
-} from './segmenter/classifier';
+/** Library version */
+export const VERSION = '1.0.0';
+
+/** Default parser options */
+export const DEFAULT_OPTIONS: Required<ParserOptions> = {
+  encoding: 'utf-8',
+  strict: false,
+};

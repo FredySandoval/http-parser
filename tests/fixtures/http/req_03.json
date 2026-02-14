@@ -3,10 +3,9 @@
   "metadata": {
     "length": 144,
     "lines": 7,
-    "encoding": "UTF-8",
+    "encoding": "utf-8",
     "source": {
-      "type": "string",
-      "name": "raw"
+      "type": "string"
     }
   },
   "lineContexts": [
@@ -105,15 +104,6 @@
     }
   ],
   "ast": {
-    "metadata": {
-      "length": 144,
-      "lines": 7,
-      "encoding": "UTF-8",
-      "source": {
-        "type": "string",
-        "name": "raw"
-      }
-    },
     "requests": [
       {
         "name": null,
@@ -128,15 +118,24 @@
           }
         ],
         "body": {
-          "type": "raw",
-          "raw": "{\n    \"name\": \"sample\",\n    \"time\": \"Wed, 21 Oct 2015 18:27:50 GMT\"\n}"
+          "status": "parsed",
+          "content": {
+            "protocol": "http",
+            "body": {
+              "kind": "json",
+              "data": {
+                "name": "sample",
+                "time": "Wed, 21 Oct 2015 18:27:50 GMT"
+              }
+            }
+          },
+          "raw": "{\n    \"name\": \"sample\",\n    \"time\": \"Wed, 21 Oct 2015 18:27:50 GMT\"\n}",
+          "contentType": "application/json",
+          "size": 69
         },
-        "variables": {
-          "fileVariables": [],
-          "prompt": [],
-          "request": []
+        "blockVariables": {
+          "fileVariables": []
         },
-        "settings": [],
         "comments": [],
         "rawTextRange": {
           "startLine": 1,
@@ -145,6 +144,11 @@
         "expectedResponse": null
       }
     ],
-    "fileVariables": []
+    "fileScopedVariables": {
+      "fileVariables": []
+    },
+    "globalVariables": {
+      "fileVariables": []
+    }
   }
 }

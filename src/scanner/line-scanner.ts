@@ -1,18 +1,4 @@
-/**
- * LineContext represents a single line with its metadata.
- * Used throughout the parser to maintain position information.
- */
-export interface LineContext {
-  /** 1-indexed line number */
-  lineNumber: number;
-  /** Character offset where the line starts (0-indexed) */
-  startOffset: number;
-  /** Character offset where the line ends (exclusive, points to position after last character) */
-  endOffset: number;
-  /** Raw text content of the line (without line break) */
-  text: string;
-}
-
+import { type LineContext } from '../types/types';
 /**
  * LineScanner Class
  * Lightweight component to split text into lines with metadata.

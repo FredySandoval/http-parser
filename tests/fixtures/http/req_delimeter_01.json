@@ -3,10 +3,9 @@
   "metadata": {
     "length": 740,
     "lines": 41,
-    "encoding": "UTF-8",
+    "encoding": "utf-8",
     "source": {
-      "type": "string",
-      "name": "raw"
+      "type": "string"
     }
   },
   "lineContexts": [
@@ -516,15 +515,6 @@
     }
   ],
   "ast": {
-    "metadata": {
-      "length": 740,
-      "lines": 41,
-      "encoding": "UTF-8",
-      "source": {
-        "type": "string",
-        "name": "raw"
-      }
-    },
     "requests": [
       {
         "name": null,
@@ -539,15 +529,24 @@
           }
         ],
         "body": {
-          "type": "raw",
-          "raw": "{\n    \"name\": \"sample\",\n    \"time\": \"Wed, 21 Oct 2015 18:27:50 GMT\"\n}\n"
+          "status": "parsed",
+          "content": {
+            "protocol": "http",
+            "body": {
+              "kind": "json",
+              "data": {
+                "name": "sample",
+                "time": "Wed, 21 Oct 2015 18:27:50 GMT"
+              }
+            }
+          },
+          "raw": "{\n    \"name\": \"sample\",\n    \"time\": \"Wed, 21 Oct 2015 18:27:50 GMT\"\n}\n",
+          "contentType": "application/json",
+          "size": 70
         },
-        "variables": {
-          "fileVariables": [],
-          "prompt": [],
-          "request": []
+        "blockVariables": {
+          "fileVariables": []
         },
-        "settings": [],
         "comments": [],
         "rawTextRange": {
           "startLine": 1,
@@ -571,7 +570,7 @@
               "value": "Wed, 21 Oct 2015 18:27:51 GMT"
             }
           ],
-          "body": "{\n    \"id\": 123,\n    \"name\": \"sample\",\n    \"time\": \"Wed, 21 Oct 2015 18:27:50 GMT\",\n    \"message\": \"Comment created successfully\"\n}\n",
+          "body": "{\n    \"id\": 123,\n    \"name\": \"sample\",\n    \"time\": \"Wed, 21 Oct 2015 18:27:50 GMT\",\n    \"message\": \"Comment created successfully\"\n}",
           "variables": {
             "fileVariables": []
           },
@@ -589,12 +588,9 @@
         "queryParams": [],
         "headers": [],
         "body": null,
-        "variables": {
-          "fileVariables": [],
-          "prompt": [],
-          "request": []
+        "blockVariables": {
+          "fileVariables": []
         },
-        "settings": [],
         "comments": [],
         "rawTextRange": {
           "startLine": 25,
@@ -618,7 +614,7 @@
               "value": "Wed, 21 Oct 2015 18:27:51 GMT"
             }
           ],
-          "body": "{\n    \"id\": 123,\n    \"name\": \"sample\",\n    \"time\": \"Wed, 21 Oct 2015 18:27:50 GMT\",\n    \"message\": \"Comment created successfully\"\n}\n",
+          "body": "{\n    \"id\": 123,\n    \"name\": \"sample\",\n    \"time\": \"Wed, 21 Oct 2015 18:27:50 GMT\",\n    \"message\": \"Comment created successfully\"\n}",
           "variables": {
             "fileVariables": []
           },
@@ -629,6 +625,11 @@
         }
       }
     ],
-    "fileVariables": []
+    "fileScopedVariables": {
+      "fileVariables": []
+    },
+    "globalVariables": {
+      "fileVariables": []
+    }
   }
 }

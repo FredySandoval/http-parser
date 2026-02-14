@@ -2,6 +2,7 @@ import { test, expect, describe } from 'bun:test';
 import { Segmenter } from '../../src/segmenter/segmenter';
 import { SegmentClassifier } from '../../src/segmenter/classifier';
 import { LineScanner } from '../../src/scanner/line-scanner';
+import { ClassifiedSegment } from '../../src/types/types';
 
 /**
  * Test suite for SegmentClassifier class.
@@ -23,8 +24,8 @@ describe('SegmentClassifier', () => {
     const result = classifier.classify(segments);
 
     expect(result).toHaveLength(1);
-    expect(result[0]!.type).toBe('request');
-    expect(result[0]!.subtype).toBe('http');
+    expect(result[0]!.messageType).toBe('request');
+    expect(result[0]!.segmentType).toBe('http');
     expect(result[0]!.firstNonEmptyLine.text).toBe(
       'GET https://example.com HTTP/1.1'
     );
@@ -36,8 +37,8 @@ describe('SegmentClassifier', () => {
     const result = classifier.classify(segments);
 
     expect(result).toHaveLength(1);
-    expect(result[0]!.type).toBe('response');
-    expect(result[0]!.subtype).toBe('http');
+    expect(result[0]!.messageType).toBe('response');
+    expect(result[0]!.segmentType).toBe('http');
     expect(result[0]!.firstNonEmptyLine.text).toBe('HTTP/1.1 200 OK');
   });
 
@@ -47,8 +48,8 @@ describe('SegmentClassifier', () => {
     const result = classifier.classify(segments);
 
     expect(result).toHaveLength(1);
-    expect(result[0]!.type).toBe('request');
-    expect(result[0]!.subtype).toBe('curl');
+    expect(result[0]!.messageType).toBe('request');
+    expect(result[0]!.segmentType).toBe('curl');
   });
 
   test('should classify a GraphQL request if the X-REQUEST-TYPE header is present', () => {
@@ -68,8 +69,8 @@ query {
     const result = classifier.classify(segments);
 
     expect(result).toHaveLength(1);
-    expect(result[0]!.type).toBe('request');
-    expect(result[0]!.subtype).toBe('graphql');
+    expect(result[0]!.messageType).toBe('request');
+    expect(result[0]!.segmentType).toBe('graphql');
   });
 
   test('should find the first non-empty line ignoring whitespace-only lines', () => {
@@ -90,8 +91,8 @@ query {
     const result = classifier.classify(segments);
 
     expect(result).toHaveLength(2);
-    expect(result[0]!.type).toBe('response');
-    expect(result[1]!.subtype).toBe('curl');
+    expect(result[0]!.messageType).toBe('response');
+    expect(result[1]!.segmentType).toBe('curl');
   });
 
   test('should classify segments correctly when multiple types are present', () => {
@@ -107,10 +108,10 @@ curl https://example.com
     const result = classifier.classify(segments);
 
     expect(result).toHaveLength(3);
-    expect(result[0]!.type).toBe('request');
-    expect(result[0]!.subtype).toBe('http');
-    expect(result[1]!.type).toBe('response');
-    expect(result[2]!.subtype).toBe('curl');
+    expect(result[0]!.messageType).toBe('request');
+    expect(result[0]!.segmentType).toBe('http');
+    expect(result[1]!.messageType).toBe('response');
+    expect(result[2]!.segmentType).toBe('curl');
   });
 
   test('should match the segmenter classifier output example from SPECIFICATION.md Section 4.1', () => {
@@ -128,15 +129,15 @@ GET https://example.com/posts?id=1
 `.trim();
     const lines = scanner.scan(input);
     const segments = segmenter.segment(lines);
-    const result = classifier.classify(segments);
+    const result:ClassifiedSegment[] = classifier.classify(segments);
 
     expect(result).toHaveLength(2);
 
     // First segment (POST)
     expect(result[0]!).toMatchObject({
       segmentId: 0,
-      type: 'request',
-      subtype: 'http',
+      messageType: 'request',
+      segmentType: 'http',
       firstNonEmptyLine: {
         lineNumber: 1,
         text: 'POST https://example.com/comments HTTP/1.1',
@@ -146,8 +147,8 @@ GET https://example.com/posts?id=1
     // Second segment (GET)
     expect(result[1]!).toMatchObject({
       segmentId: 1,
-      type: 'request',
-      subtype: 'http',
+      messageType: 'request',
+      segmentType: 'http',
       firstNonEmptyLine: {
         lineNumber: 10,
         text: 'GET https://example.com/posts?id=1',

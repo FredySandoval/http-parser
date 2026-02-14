@@ -1,412 +1,347 @@
-import { LineScanner, type LineContext } from './scanner/line-scanner';
-import { Segmenter, type Segment } from './segmenter/segmenter';
+import type {
+  ParseResult,
+  ParseMetadata,
+  ParserOptions,
+  LineContext,
+  Segment,
+  HttpRequestAST,
+  Request,
+  ExpectedResponse,
+  ClassifiedSegment,
+  ScanResult,
+  SourceMetadata,
+} from './types/types';
+import { LineScanner } from './scanner/line-scanner';
+import { Segmenter } from './segmenter/segmenter';
+import { VariableScanner, VariableRegistry } from './scanner/variable-scanner';
 import { SegmentClassifier } from './segmenter/classifier';
 import { SegmentParser } from './parsers/segment-parser';
-import {
-  type HttpRequestAST,
-  type Request,
-  type ExpectedResponse,
-} from './ast';
-import { type FileVariable } from './scanner/variable-scanner';
 
 /**
- * Source metadata describing the origin of the parsed text.
- */
-export interface SourceMetadata {
-  /** Type of input source */
-  type: 'string' | 'stream';
-  /** Name of the source (raw, filename, or stream_input) */
-  name?: string;
-}
-
-/**
- * Metadata about the parsed input.
- */
-export interface ParseMetadata {
-  /** Total character length of the input */
-  length: number;
-  /** Total number of lines in the input */
-  lines: number;
-  /** Character encoding of the input */
-  encoding: string;
-  /** Source information */
-  source: SourceMetadata;
-}
-
-/**
- * Result of the input parsing phase.
- * Contains the raw text and metadata about the source.
- */
-export interface ParsedInput {
-  /** The raw text content */
-  text: string;
-  /** Metadata about the input */
-  metadata: ParseMetadata;
-}
-
-/**
- * Extended parsing result that includes processed data.
- */
-export interface ParseResult extends ParsedInput {
-  /** Array of LineContext objects from the line scanner */
-  lineContexts: LineContext[];
-  /** Array of Segment objects from the segmenter */
-  segments: Segment[];
-  /** The final AST representation */
-  ast: HttpRequestAST;
-}
-
-/**
- * Configuration options for the HttpRequestParser.
- */
-export interface ParserOptions {
-  /** Character encoding to use (default: UTF-8) */
-  encoding?: string;
-  /** Enable strict mode for validation (default: false) */
-  strict?: boolean;
-}
-
-/**
- * Plugin interface for extending parser functionality.
- */
-export interface ParserPlugin {
-  /** Unique name of the plugin */
-  name: string;
-  /** Called before parsing begins */
-  onBeforeParse?: (input: string) => string | void;
-  /** Called after parsing completes */
-  onAfterParse?: (result: ParseResult) => ParseResult | void;
-}
-
-/**
- * Internal state for incremental parsing.
- */
-interface IncrementalState {
-  /** Accumulated text from chunks */
-  buffer: string;
-  /** Whether parsing has been finalized */
-  finalized: boolean;
-}
-
-/**
- * Default parser options.
- */
-const DEFAULT_OPTIONS: Required<ParserOptions> = {
-  encoding: 'UTF-8',
-  strict: false,
-};
-
-/**
- * HttpRequestParser Class
- * Main entry point for parsing HTTP requests from various sources.
+ * HttpRequestParser - Main Orchestrator
  *
- * Supports:
- * - Synchronous parsing from string (parseText)
- * - Asynchronous parsing from stream (parseStream)
- * - Incremental parsing (parseChunk)
- * - Plugin system for extensibility (usePlugin)
+ * Coordinates the entire parsing pipeline from raw text to structured AST.
+ * Manages all sub-components and assembles the final ParseResult.
+ *
+ * Responsibilities:
+ * - Coordinate line scanning, segmentation, classification, and parsing
+ * - Manage variable scanning and registry population
+ * - Link responses to their preceding requests
+ * - Assemble final ParseResult with all metadata
+ *
+ * Parsing Pipeline:
+ * 1. Line Scanning - split text into lines with metadata
+ * 2. Segmentation - group lines into segments by ### delimiters
+ * 3. Variable Scanning - extract file-level and block-level variables
+ * 4. Classification - determine if segment is request or response
+ * 5. Segment Parsing - parse each segment into AST nodes
+ * 6. Response Linking - associate responses with preceding requests
+ * 7. Result Assembly - build final ParseResult
  *
  * @example
  * const parser = new HttpRequestParser();
- * const result = parser.parseText("GET https://example.com HTTP/1.1");
+ * const result = parser.parseText(rawHttpFile);
  */
 export class HttpRequestParser {
-  private readonly options: Required<ParserOptions>;
-  private readonly plugins: ParserPlugin[];
-  private readonly lineScanner: LineScanner;
-  private readonly segmenter: Segmenter;
-  private readonly segmentClassifier: SegmentClassifier;
-  private readonly segmentParser: SegmentParser;
-  private incrementalState: IncrementalState;
+  private lineScanner: LineScanner;
+  private segmenter: Segmenter;
+  private variableScanner: VariableScanner;
+  private segmentClassifier: SegmentClassifier;
+  private segmentParser: SegmentParser;
+  private options: ParserOptions;
 
   /**
-   * Creates a new HttpRequestParser instance.
+   * Creates a new HttpRequestParser with optional configuration.
    *
-   * @param options - Configuration options for the parser
+   * @param options - Parser configuration options
    */
-  constructor(options: ParserOptions = {}) {
-    this.options = { ...DEFAULT_OPTIONS, ...options };
-    this.plugins = [];
+  constructor(options?: ParserOptions) {
+    this.options = options ?? {};
     this.lineScanner = new LineScanner();
     this.segmenter = new Segmenter();
+    this.variableScanner = new VariableScanner();
     this.segmentClassifier = new SegmentClassifier();
     this.segmentParser = new SegmentParser();
-    this.incrementalState = {
-      buffer: '',
-      finalized: false,
-    };
   }
 
   /**
-   * Parses HTTP requests from a string synchronously.
+   * Main entry point for parsing HTTP files.
+   * Executes the full parsing pipeline and returns structured result.
    *
-   * @param text - The raw text content to parse
-   * @returns ParseResult containing text, metadata, and parsed structures
-   * @throws Error if input is not a string
+   * @param text - Raw HTTP file content to parse
+   * @returns Complete ParseResult with AST and metadata
    *
    * @example
-   * const result = parser.parseText("POST /foo HTTP/1.1\nContent-Type: application/json");
+   * Input: "GET https://api.example.com/users\n###\nPOST /create"
+   * Output: {
+   *   text: "GET https://api.example.com/users\n###\nPOST /create",
+   *   metadata: { length: 46, lines: 3, encoding: 'utf-8', source: { type: 'string' } },
+   *   lineContexts: [...],
+   *   segments: [...],
+   *   ast: {
+   *     requests: [...],
+   *     fileScopedVariables: { fileVariables: [...] },
+   *     globalVariables: { fileVariables: [...] }
+   *   }
+   * }
    */
   parseText(text: string): ParseResult {
-    // Validate input
-    if (typeof text !== 'string') {
-      throw new Error('Input must be a string');
+    // Step 1: Line Scanning
+    const lineContexts = this.lineScanner.scan(text);
+
+    // Step 2: Segmentation
+    const segments = this.createSegments(lineContexts);
+
+    // Step 3: Variable Scanning
+    const scanResult = this.scanVariables(segments);
+
+    // Create variable registry and populate with file-level variables
+    const registry = new VariableRegistry();
+    for (const variable of scanResult.fileVariables) {
+      // File-level variables (segmentId === null) go to global registry
+      if (variable.segmentId === null) {
+        registry.set(variable.key, variable.value);
+      } else {
+        // Segment-level variables go to segment-specific registry
+        registry.setForSegment(
+          variable.segmentId,
+          variable.key,
+          variable.value
+        );
+      }
     }
 
-    // Apply pre-parse plugins
-    let processedText = text;
-    for (const plugin of this.plugins) {
-      if (plugin.onBeforeParse) {
-        const result = plugin.onBeforeParse(processedText);
-        if (typeof result === 'string') {
-          processedText = result;
+    // Step 4: Classification
+    const classifiedSegments = this.classifySegments(segments);
+
+    // Step 5: Segment Parsing
+    const parsedNodes = this.parseSegments(classifiedSegments, registry);
+
+    // Step 6: Response Linking
+    const requests = this.linkResponses(parsedNodes);
+
+    // Step 7: Result Assembly
+    const result = this.buildResult(
+      text,
+      lineContexts,
+      segments,
+      scanResult,
+      requests
+    );
+
+    return result;
+  }
+
+  /**
+   * Delegates to Segmenter to split lines into segments.
+   *
+   * @param lines - Array of LineContext objects from LineScanner
+   * @returns Array of Segment objects grouped by ### delimiters
+   */
+  private createSegments(lines: LineContext[]): Segment[] {
+    return this.segmenter.segment(lines);
+  }
+
+  /**
+   * Delegates to VariableScanner to extract all variables and comments.
+   *
+   * @param segments - Array of Segment objects
+   * @returns ScanResult containing fileVariables and fileComments
+   */
+  private scanVariables(segments: Segment[]): ScanResult {
+    return this.variableScanner.scan(segments);
+  }
+
+  /**
+   * Delegates to SegmentClassifier to classify each segment.
+   *
+   * @param segments - Array of Segment objects
+   * @returns Array of ClassifiedSegment objects
+   */
+  private classifySegments(segments: Segment[]): ClassifiedSegment[] {
+    return this.segmentClassifier.classify(segments);
+  }
+
+  /**
+   * Parses each classified segment into its AST representation.
+   * Delegates to SegmentParser for individual segment parsing.
+   *
+   * @param classifiedSegments - Array of ClassifiedSegment objects
+   * @param registry - VariableRegistry for variable substitution
+   * @returns Array of parsed Request, ExpectedResponse, or null nodes
+   */
+  private parseSegments(
+    classifiedSegments: ClassifiedSegment[],
+    registry: VariableRegistry
+  ): Array<Request | ExpectedResponse | null> {
+    return classifiedSegments.map((segment) =>
+      this.segmentParser.parseSegment(segment, registry)
+    );
+  }
+
+  /**
+   * Links ExpectedResponse nodes to their preceding Request nodes.
+   * According to HTTP file format, a response segment immediately follows
+   * the request it describes.
+   *
+   * Rules:
+   * - A response segment is associated with the most recent request segment
+   * - Multiple responses can follow a single request (overloaded responses)
+   * - Responses without a preceding request are ignored (or error in strict mode)
+   *
+   * @param nodes - Array of parsed Request, ExpectedResponse, or null nodes
+   * @returns Array of Request objects with expectedResponse populated
+   */
+  private linkResponses(
+    nodes: Array<Request | ExpectedResponse | null>
+  ): Request[] {
+    const requests: Request[] = [];
+    let lastRequest: Request | null = null;
+
+    for (const node of nodes) {
+      if (node === null) {
+        continue;
+      }
+
+      // Check if this is a Request or ExpectedResponse
+      if (this.isRequest(node)) {
+        // It's a request - add to list and track as last request
+        requests.push(node);
+        lastRequest = node;
+      } else if (this.isExpectedResponse(node)) {
+        // It's a response - associate with last request
+        if (lastRequest) {
+          // If there's already an expected response, we might want to handle multiple responses
+          // For now, we'll just set it (overwriting any previous value)
+          lastRequest.expectedResponse = node;
+        } else {
+          // Response without a preceding request
+          if (this.options.strict) {
+            // In strict mode, this could be an error
+            // For now, we'll just skip it
+            console.warn(
+              `Warning: Expected response found without preceding request at line ${node.rawTextRange.startLine}`
+            );
+          }
+          // In non-strict mode, we simply ignore orphaned responses
         }
       }
     }
 
-    // Scan lines
-    const lineContexts = this.lineScanner.scan(processedText);
+    return requests;
+  }
 
-    // Segment the lines
-    const segments = this.segmenter.segment(lineContexts);
+  /**
+   * Type guard to check if a node is a Request
+   */
+  private isRequest(node: Request | ExpectedResponse): node is Request {
+    return 'method' in node && 'url' in node;
+  }
 
-    // Classify segments
-    const classifiedSegments = this.segmentClassifier.classify(segments);
+  /**
+   * Type guard to check if a node is an ExpectedResponse
+   */
+  private isExpectedResponse(
+    node: Request | ExpectedResponse
+  ): node is ExpectedResponse {
+    return 'statusCode' in node;
+  }
 
-    // Parse individual segments
-    const parsedObjects = classifiedSegments.map((seg) =>
-      this.segmentParser.parse(seg)
-    );
+  /**
+   * Assembles all parsed components into the final ParseResult structure.
+   *
+   * @param text - Original raw HTTP file text
+   * @param lineContexts - Array of LineContext objects
+   * @param segments - Array of Segment objects
+   * @param scanResult - ScanResult containing variables and comments
+   * @param requests - Array of Request objects with linked responses
+   * @returns Complete ParseResult
+   */
+  private buildResult(
+    text: string,
+    lineContexts: LineContext[],
+    segments: Segment[],
+    scanResult: ScanResult,
+    requests: Request[]
+  ): ParseResult {
+    const metadata = this.createMetadata(text);
 
-    // Assemble AST
-    const metadata: ParseMetadata = {
-      length: processedText.length,
-      lines: lineContexts.length,
-      encoding: this.options.encoding,
-      source: {
-        type: 'string',
-        name: 'raw',
+    const ast: HttpRequestAST = {
+      requests,
+      fileScopedVariables: {
+        fileVariables: this.getFileScopedVariables(
+          lineContexts,
+          scanResult.fileVariables
+        ),
+      },
+      globalVariables: {
+        fileVariables: scanResult.fileVariables,
       },
     };
 
-    const ast = this.assembleAST(parsedObjects, metadata);
-
-    // Build result
-    let result: ParseResult = {
-      text: processedText,
+    return {
+      text,
       metadata,
       lineContexts,
       segments,
       ast,
     };
-
-    // Apply post-parse plugins
-    for (const plugin of this.plugins) {
-      if (plugin.onAfterParse) {
-        const pluginResult = plugin.onAfterParse(result);
-        if (pluginResult) {
-          result = pluginResult;
-        }
-      }
-    }
-
-    return result;
   }
 
   /**
-   * Parses HTTP requests from a readable stream asynchronously.
+   * Calculates metadata about the source text.
    *
-   * @param stream - A ReadableStream or async iterable to parse
-   * @returns Promise resolving to ParseResult
-   * @throws Error if stream is not readable
-   *
-   * @example
-   * const result = await parser.parseStream(readableStream);
+   * @param text - The raw input text
+   * @returns ParseMetadata with length, line count, encoding, and source info
    */
-  async parseStream(
-    stream: ReadableStream<Uint8Array> | AsyncIterable<Uint8Array>
-  ): Promise<ParseResult> {
-    // Validate stream
-    if (!stream || typeof stream !== 'object') {
-      throw new Error('Stream must be a ReadableStream or async iterable');
-    }
+  private createMetadata(text: string): ParseMetadata {
+    const lines = text.split(/\r?\n/);
+    // Handle trailing newline
+    const lineCount = lines.length === 1 && lines[0] === '' ? 1 : lines.length;
 
-    const decoder = new TextDecoder();
-    let content = '';
-
-    // Handle ReadableStream
-    if ('getReader' in stream && typeof stream.getReader === 'function') {
-      const reader = stream.getReader();
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          content += decoder.decode(value, { stream: true });
-        }
-        content += decoder.decode(); // Flush remaining bytes
-      } finally {
-        reader.releaseLock();
-      }
-    }
-    // Handle async iterable
-    else if (Symbol.asyncIterator in stream) {
-      for await (const chunk of stream as AsyncIterable<Uint8Array>) {
-        content += decoder.decode(chunk, { stream: true });
-      }
-      content += decoder.decode(); // Flush remaining bytes
-    } else {
-      throw new Error('Stream must be a ReadableStream or async iterable');
-    }
-
-    // Parse the content
-    const result = this.parseText(content);
-
-    // Update source metadata
-    result.metadata.source = {
-      type: 'stream',
-      name: 'stream_input',
+    const source: SourceMetadata = {
+      type: 'string',
     };
-
-    return result;
-  }
-
-  /**
-   * Parses a chunk of text incrementally.
-   * Call multiple times with chunks, then call parseText("") with accumulated buffer.
-   *
-   * @param chunk - A chunk of text to add to the buffer
-   * @throws Error if chunk is not a string or parsing is already finalized
-   *
-   * @example
-   * parser.parseChunk("GET /foo");
-   * parser.parseChunk(" HTTP/1.1\n");
-   * const result = parser.finalizeChunks();
-   */
-  parseChunk(chunk: string): void {
-    // Validate chunk
-    if (typeof chunk !== 'string') {
-      throw new Error('Chunk must be a string');
-    }
-
-    if (this.incrementalState.finalized) {
-      throw new Error('Cannot add chunks after parsing has been finalized');
-    }
-
-    // Add to buffer
-    this.incrementalState.buffer += chunk;
-  }
-
-  /**
-   * Finalizes incremental parsing and returns the result.
-   *
-   * @returns ParseResult from accumulated chunks
-   */
-  finalizeChunks(): ParseResult {
-    this.incrementalState.finalized = true;
-    return this.parseText(this.incrementalState.buffer);
-  }
-
-  /**
-   * Resets the incremental parsing state.
-   */
-  resetChunks(): void {
-    this.incrementalState = {
-      buffer: '',
-      finalized: false,
-    };
-  }
-
-  /**
-   * Registers a plugin for the parsing lifecycle.
-   *
-   * @param plugin - The plugin to register
-   * @throws Error if plugin is invalid
-   *
-   * @example
-   * parser.usePlugin({
-   *   name: 'my-plugin',
-   *   onBeforeParse: (input) => input.trim(),
-   *   onAfterParse: (result) => { console.log(result); }
-   * });
-   */
-  usePlugin(plugin: ParserPlugin): this {
-    // Validate plugin shape
-    if (!plugin || typeof plugin !== 'object') {
-      throw new Error('Plugin must be an object');
-    }
-
-    if (typeof plugin.name !== 'string' || plugin.name.trim().length === 0) {
-      throw new Error('Plugin must have a non-empty name');
-    }
-
-    if (
-      plugin.onBeforeParse !== undefined &&
-      typeof plugin.onBeforeParse !== 'function'
-    ) {
-      throw new Error('Plugin onBeforeParse must be a function');
-    }
-
-    if (
-      plugin.onAfterParse !== undefined &&
-      typeof plugin.onAfterParse !== 'function'
-    ) {
-      throw new Error('Plugin onAfterParse must be a function');
-    }
-
-    // Register plugin
-    this.plugins.push(plugin);
-
-    return this;
-  }
-
-  /**
-   * Assembles the final AST from individual parsed objects.
-   * Handles association between Requests and ExpectedResponses.
-   */
-  private assembleAST(
-    parsedObjects: (Request | ExpectedResponse)[],
-    metadata: ParseMetadata
-  ): HttpRequestAST {
-    const requests: Request[] = [];
-    const fileVariables: FileVariable[] = [];
-
-    let lastRequest: Request | null = null;
-
-    for (const obj of parsedObjects) {
-      // Collect all file variables from all segments
-      if (obj.variables) {
-        fileVariables.push(...obj.variables.fileVariables);
-      }
-
-      if (this.isRequest(obj)) {
-        requests.push(obj);
-        lastRequest = obj;
-      } else if (this.isExpectedResponse(obj)) {
-        if (lastRequest) {
-          // Only associate if it's the first response for this request
-          if (!lastRequest.expectedResponse) {
-            lastRequest.expectedResponse = obj;
-          }
-          // Multiple responses for same request are invalid/ignored per spec 2.18.4
-        }
-        // Response blocks without preceding requests are ignored per spec 2.18.4
-      }
-    }
 
     return {
-      metadata,
-      requests,
-      fileVariables,
+      length: text.length,
+      lines: lineCount,
+      encoding: this.options.encoding ?? 'utf-8',
+      source,
     };
   }
 
-  private isRequest(obj: Request | ExpectedResponse): obj is Request {
-    return 'method' in obj;
-  }
+  /**
+   * Returns only variables declared before the first segment delimiter (###).
+   */
+  private getFileScopedVariables(
+    lineContexts: LineContext[],
+    fileVariables: ScanResult['fileVariables']
+  ): ScanResult['fileVariables'] {
+    const firstDelimiterLine = lineContexts.find(
+      (line) => line.text.trim() === '###'
+    )?.lineNumber;
 
-  private isExpectedResponse(
-    obj: Request | ExpectedResponse
-  ): obj is ExpectedResponse {
-    return 'statusCode' in obj;
+    if (firstDelimiterLine === undefined) {
+      return fileVariables;
+    }
+
+    return fileVariables.filter(
+      (variable) => variable.lineNumber < firstDelimiterLine
+    );
   }
+}
+
+/**
+ * Configuration options for HttpRequestParser.
+ */
+export interface ExtendedParserOptions {
+  /** Character encoding (default: 'utf-8') */
+  encoding?: string;
+  /** Enable strict validation mode (default: false) */
+  strict?: boolean;
+  /** Maximum number of segments to parse (default: unlimited) */
+  maxSegments?: number;
+  /** Maximum body size in bytes (default: unlimited) */
+  maxBodySize?: number;
 }

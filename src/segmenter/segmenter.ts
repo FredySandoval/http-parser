@@ -1,19 +1,9 @@
-import type { LineContext } from '../scanner/line-scanner';
+import type { LineContext, Segment} from '../types/types';
 
 /**
  * Segment represents a group of lines between ### delimiters.
  * Each segment may contain a request or response.
  */
-export interface Segment {
-  /** Unique identifier for this segment (0-indexed) */
-  segmentId: number;
-  /** First line number in this segment (1-indexed) */
-  startLine: number;
-  /** Last line number in this segment (1-indexed) */
-  endLine: number;
-  /** Array of LineContext objects belonging to this segment */
-  lines: LineContext[];
-}
 
 /**
  * Segmenter Class
